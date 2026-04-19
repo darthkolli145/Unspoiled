@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Sprout } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -189,6 +189,7 @@ export function DashboardShell(props: Props) {
     coveredOnly ||
     search.length > 0;
 
+  const rowsRequestIdRef = useRef(0);
   async function refreshRows(next: {
     state?: string;
     status?: string;
@@ -196,6 +197,7 @@ export function DashboardShell(props: Props) {
     covered?: boolean;
     q?: string;
   }) {
+    const requestId = ++rowsRequestIdRef.current;
     setRowsLoading(true);
     const params = new URLSearchParams();
     const s = next.state ?? stateFilter;
@@ -209,10 +211,16 @@ export function DashboardShell(props: Props) {
     if (cov) params.set("covered", "true");
     if (q) params.set("q", q);
     params.set("limit", "400");
-    const res = await fetch(`/api/generators?${params.toString()}`);
-    const data = (await res.json()) as { items: Generator[] };
-    setRows(data.items);
-    setRowsLoading(false);
+    try {
+      const res = await fetch(`/api/generators?${params.toString()}`);
+      if (!res.ok) return;
+      const data = (await res.json()) as { items: Generator[] };
+      // Drop stale responses: a faster-later request may have already landed.
+      if (requestId !== rowsRequestIdRef.current) return;
+      setRows(data.items);
+    } finally {
+      if (requestId === rowsRequestIdRef.current) setRowsLoading(false);
+    }
   }
 
   async function openDetail(id: string) {
@@ -232,6 +240,27 @@ export function DashboardShell(props: Props) {
     setSelected(null);
     setDetail(null);
   }
+
+  // Defensive client-side re-filter. The rows state is populated by async
+  // fetches that can race; this guarantees the rendered table always matches
+  // the current dropdown state regardless of which response landed last.
+  const visibleRows = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return rows.filter((g) => {
+      if (stateFilter !== "all" && g.stateId !== stateFilter) return false;
+      if (statusFilter !== "all" && g.thresholdStatus !== statusFilter)
+        return false;
+      if (categoryFilter !== "all" && g.category !== categoryFilter)
+        return false;
+      if (coveredOnly && !g.coveredByBan) return false;
+      if (needle) {
+        const hay =
+          `${g.town} ${g.name} ${g.category}`.toLowerCase();
+        if (!hay.includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [rows, stateFilter, statusFilter, categoryFilter, coveredOnly, search]);
 
   const stateBars = useMemo(
     () =>
@@ -484,7 +513,7 @@ export function DashboardShell(props: Props) {
 
               <div className="flex items-center gap-3 text-[12px] text-un-ink-soft">
                 <span>
-                  {rows.length.toLocaleString()} of{" "}
+                  {visibleRows.length.toLocaleString()} of{" "}
                   {props.summary.totalGenerators.toLocaleString()} generators
                   shown
                   {hasCustomFilter ? " (filtered)" : ""}
@@ -493,7 +522,7 @@ export function DashboardShell(props: Props) {
               </div>
 
               <GeneratorsTable
-                items={rows}
+                items={visibleRows}
                 onSelect={openDetail}
                 selectedId={selected}
               />

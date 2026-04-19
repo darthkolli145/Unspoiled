@@ -8,6 +8,8 @@ import type {
   Generator,
   GeneratorDetail,
   Insight,
+  Lead,
+  LeadTier,
   ModelMetrics,
   PortfolioSummary,
   Processor,
@@ -109,6 +111,84 @@ export function queryGenerators(q: GeneratorQuery): {
   const offset = q.offset ?? 0;
   const limit = q.limit ?? 200;
   return { total: sorted.length, items: sorted.slice(offset, offset + limit) };
+}
+
+export interface LeadQuery {
+  state?: string | null;
+  tier?: string | null;
+  limit?: number;
+  offset?: number;
+}
+
+function tierForScore(score: number): LeadTier {
+  if (score >= 70) return "A";
+  if (score >= 50) return "B";
+  return "C";
+}
+
+function toLead(g: Generator): Lead {
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (g.coveredByBan) {
+    score += 40;
+    reasons.push(`Covered by active ban threshold (${g.stateId})`);
+  } else if (g.thresholdStatus === "near") {
+    score += 20;
+    reasons.push("Near active ban threshold (>=50% of threshold)");
+  } else {
+    reasons.push("Below threshold and not currently covered by a ban");
+  }
+
+  const tonnageWeight = Math.min(Math.log10(g.tonsPerYear + 1) * 10, 30);
+  score += tonnageWeight;
+  reasons.push(`Tonnage signal +${tonnageWeight.toFixed(1)} from ${g.tonsPerYear.toFixed(1)} t/yr`);
+
+  const distancePenalty = Math.min(g.nearestProcessorMiles, 20);
+  score -= distancePenalty;
+  reasons.push(`Routing penalty -${distancePenalty.toFixed(1)} for ${g.nearestProcessorMiles.toFixed(1)} mi`);
+
+  if (g.stateId === "MA") {
+    const enforcementBoost = Math.min(g.townEnforcementActions, 10) * 1.5;
+    score += enforcementBoost;
+    reasons.push(
+      `MA enforcement urgency +${enforcementBoost.toFixed(1)} from ${g.townEnforcementActions} town actions`,
+    );
+  }
+
+  const leadScore = Math.max(0, Math.min(100, score));
+  return {
+    ...g,
+    leadScore: Number(leadScore.toFixed(1)),
+    leadTier: tierForScore(leadScore),
+    leadReasons: reasons,
+  };
+}
+
+export function getLeads(q: LeadQuery = {}): {
+  total: number;
+  items: Lead[];
+} {
+  const { generators } = getCache();
+  const state = q.state ?? null;
+  const tier = q.tier ?? null;
+  const offset = q.offset ?? 0;
+  const limit = q.limit ?? 200;
+
+  let leads = generators.map(toLead);
+  if (state && state !== "all") {
+    leads = leads.filter((lead) => lead.stateId === state);
+  }
+  if (tier && tier !== "all") {
+    leads = leads.filter((lead) => lead.leadTier === tier);
+  }
+  leads.sort((a, b) => {
+    if (b.leadScore !== a.leadScore) return b.leadScore - a.leadScore;
+    if (b.tonsPerYear !== a.tonsPerYear) return b.tonsPerYear - a.tonsPerYear;
+    return a.nearestProcessorMiles - b.nearestProcessorMiles;
+  });
+
+  return { total: leads.length, items: leads.slice(offset, offset + limit) };
 }
 
 export function getGeneratorDetail(id: string): GeneratorDetail | null {

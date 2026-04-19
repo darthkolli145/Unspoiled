@@ -411,35 +411,71 @@ export function MarketingLanding() {
               Market
             </span>
             <h2 className="mt-2 font-display text-4xl font-bold leading-tight text-un-forest sm:text-5xl">
-              Flexible, commitment-free access for three buyers.
+              One lead engine, three revenue channels.
             </h2>
             <p className="mt-4 text-[16px] text-un-ink-soft">
-              Pricing figures below are illustrative — the dashboard itself
-              ships with no invented business constants.
+              Commercial leads are scored once from public regulator data, then
+              packaged for each buyer motion. Pricing figures below are
+              illustrative and explicitly not presented as factual benchmark
+              rates.
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
             <BizPanel
               title="Commercial haulers"
-              body="Need route expansion targets and a compliance-driven demand signal."
-              price="$2–5 per generator / month"
+              body="Buy scored routes town-by-town: A-tier leads surface generators likely to need immediate diversion partners."
+              model="Pay-per-lead"
+              price="$35 per A-tier lead · $15 per B-tier lead"
               featured={false}
               Icon={Carrot}
             />
             <BizPanel
-              title="Regulators"
-              body="Need inspection prioritization and enforcement visibility across towns."
-              price="$1.5k–4k per seat / year"
+              title="Composters & processors"
+              body="Subscribe to a rolling queue of nearby generators in your operating radius, refreshed as thresholds tighten."
+              model="Subscription"
+              price="$1.5k–3k / month for unlimited A-tier leads in 25 miles"
               featured
               Icon={Tomato}
             />
             <BizPanel
-              title="REIT & ESG teams"
-              body="Need credible compliance and diversion reporting from public records."
-              price="$12k–40k per portfolio / year"
+              title="Food-recovery platforms"
+              body="When an Unspoiled-sourced lead signs a diversion contract, we capture upside as a channel partner."
+              model="Success fee"
+              price="10-15% of first-year contract value"
               featured={false}
               Icon={Strawberry}
             />
+          </div>
+          <div className="mt-8 rounded-3xl bg-white p-6 ring-1 ring-un-line">
+            <div className="text-[11px] font-semibold uppercase tracking-widest text-un-sage-700">
+              How leads flow
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-center">
+              <div className="rounded-2xl bg-un-cream-100 px-4 py-3 text-[13px] text-un-forest ring-1 ring-un-line/70">
+                Public regulator data
+              </div>
+              <div className="hidden text-center text-un-coral-600 lg:block">→</div>
+              <div className="rounded-2xl bg-un-sage-100 px-4 py-3 text-[13px] text-un-forest ring-1 ring-un-line/70">
+                Unspoiled scoring engine
+              </div>
+              <div className="hidden text-center text-un-coral-600 lg:block">→</div>
+              <div className="grid grid-cols-1 gap-2">
+                <div className="rounded-xl bg-un-forest px-3 py-2 text-[12px] font-semibold text-un-cream-50">
+                  A-tier leads → haulers (per-lead), processors (subscription),
+                  recovery (success fee)
+                </div>
+                <div className="rounded-xl bg-un-gold-200 px-3 py-2 text-[12px] font-semibold text-un-forest ring-1 ring-un-gold-400/40">
+                  B-tier leads → haulers and processors
+                </div>
+                <div className="rounded-xl bg-un-cream-200 px-3 py-2 text-[12px] font-semibold text-un-ink-soft ring-1 ring-un-line">
+                  C-tier leads → processors for nurture queue
+                </div>
+              </div>
+            </div>
+            <p className="mt-4 text-[12px] text-un-ink-soft">
+              Sourced from public disclosures. No private or scraped business
+              data is required for the current product loop.
+            </p>
           </div>
         </div>
       </section>
@@ -800,12 +836,14 @@ function MetricCard({
 function BizPanel({
   title,
   body,
+  model,
   price,
   featured,
   Icon,
 }: {
   title: string;
   body: string;
+  model: string;
   price: string;
   featured: boolean;
   Icon: typeof Tomato;
@@ -830,8 +868,13 @@ function BizPanel({
         </span>
       )}
       <div className="relative z-10">
+        <div
+          className={`text-[10.5px] font-semibold uppercase tracking-widest ${featured ? "text-un-coral-300" : "text-un-coral-500"}`}
+        >
+          {model}
+        </div>
         <h3
-          className={`font-display text-[26px] font-bold ${featured ? "text-white" : "text-un-forest"}`}
+          className={`mt-1 font-display text-[26px] font-bold ${featured ? "text-white" : "text-un-forest"}`}
         >
           {title}
         </h3>

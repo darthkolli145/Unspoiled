@@ -54,6 +54,16 @@ export interface Generator {
   source: string;
 }
 
+export type LeadTier = "A" | "B" | "C";
+
+export interface Lead extends Generator {
+  /** Composite 0-100 score derived from threshold, tonnage, distance, and enforcement signals. */
+  leadScore: number;
+  leadTier: LeadTier;
+  /** Human-readable explanations for why this record scored as it did. */
+  leadReasons: string[];
+}
+
 export interface Processor {
   id: string;
   name: string;

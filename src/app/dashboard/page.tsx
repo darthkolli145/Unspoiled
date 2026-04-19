@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import {
+  getLeads,
   getInsights,
   getModelMetrics,
   getModelScatter,
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const model = getModelMetrics();
   const scatter = getModelScatter(600);
   const insights = getInsights();
+  const initialLeads = getLeads({ limit: 400, offset: 0 });
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-un-cream-50" />}>
@@ -33,6 +35,7 @@ export default function DashboardPage() {
         model={model}
         insights={insights}
         scatter={scatter}
+        initialLeads={initialLeads}
       />
     </Suspense>
   );

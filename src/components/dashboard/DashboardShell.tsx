@@ -14,11 +14,12 @@ import { GeneratorDetailPanel } from "./GeneratorDetailPanel";
 import { ModelPerformance } from "./ModelPerformance";
 import { EnforcementView } from "./EnforcementView";
 import { InsightsView } from "./InsightsView";
+import { LeadsView } from "./LeadsView";
 import { BarChart } from "@/components/charts/BarChart";
 import { Histogram } from "@/components/charts/Histogram";
 
 import type { GeneratorPoint } from "@/lib/harvest-data";
-import type { Enforcement, Insight } from "@/lib/types";
+import type { Enforcement, Insight, Lead, LeadTier } from "@/lib/types";
 
 const GeneratorsMap = dynamic(
   () =>
@@ -70,6 +71,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 type Tab =
+  | "leads"
   | "insights"
   | "generators"
   | "map"
@@ -90,6 +92,10 @@ interface Props {
     stateId: string;
     category: string;
   }>;
+  initialLeads: {
+    total: number;
+    items: Lead[];
+  };
 }
 
 export function DashboardShell(props: Props) {
@@ -97,10 +103,12 @@ export function DashboardShell(props: Props) {
   const queryState = searchParams.get("state")?.toUpperCase() ?? "all";
   const initialStateFilter = STATE_OPTIONS.includes(queryState) ? queryState : "all";
 
-  const [tab, setTab] = useState<Tab>("insights");
+  const [tab, setTab] = useState<Tab>("leads");
   const [stateFilter, setStateFilter] = useState(initialStateFilter);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [leadStateFilter, setLeadStateFilter] = useState("all");
+  const [leadTierFilter, setLeadTierFilter] = useState<"all" | LeadTier>("all");
   const [coveredOnly, setCoveredOnly] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -114,6 +122,9 @@ export function DashboardShell(props: Props) {
   const [rowsLoading, setRowsLoading] = useState(false);
   const [mapPoints, setMapPoints] = useState<GeneratorPoint[] | null>(null);
   const [mapLoading, setMapLoading] = useState(false);
+  const [leads, setLeads] = useState<Lead[]>(props.initialLeads.items);
+  const [leadsTotal, setLeadsTotal] = useState(props.initialLeads.total);
+  const [leadsLoading, setLeadsLoading] = useState(false);
   const [enforcement, setEnforcement] = useState<Enforcement | null>(null);
   const [enforcementLoading, setEnforcementLoading] = useState(false);
 
@@ -143,6 +154,26 @@ export function DashboardShell(props: Props) {
     } finally {
       setEnforcementLoading(false);
     }
+  }
+
+  async function refreshLeads(next: {
+    state?: string;
+    tier?: "all" | LeadTier;
+  }) {
+    setLeadsLoading(true);
+    const params = new URLSearchParams();
+    const state = next.state ?? leadStateFilter;
+    const tier = next.tier ?? leadTierFilter;
+    if (state !== "all") params.set("state", state);
+    if (tier !== "all") params.set("tier", tier);
+    params.set("limit", "400");
+    const res = await fetch(`/api/leads?${params.toString()}`);
+    if (res.ok) {
+      const data = (await res.json()) as { total: number; items: Lead[] };
+      setLeads(data.items);
+      setLeadsTotal(data.total);
+    }
+    setLeadsLoading(false);
   }
 
   function switchTab(next: Tab) {
@@ -303,6 +334,9 @@ export function DashboardShell(props: Props) {
           >
             Insights
           </TabButton>
+          <TabButton active={tab === "leads"} onClick={() => switchTab("leads")}>
+            Leads
+          </TabButton>
           <TabButton
             active={tab === "generators"}
             onClick={() => switchTab("generators")}
@@ -333,6 +367,24 @@ export function DashboardShell(props: Props) {
         </div>
 
         <div className="mt-5">
+          {tab === "leads" && (
+            <LeadsView
+              items={leads}
+              total={leadsTotal}
+              loading={leadsLoading}
+              stateFilter={leadStateFilter}
+              tierFilter={leadTierFilter}
+              onStateChange={(value) => {
+                setLeadStateFilter(value);
+                refreshLeads({ state: value });
+              }}
+              onTierChange={(value) => {
+                setLeadTierFilter(value);
+                refreshLeads({ tier: value });
+              }}
+            />
+          )}
+
           {tab === "insights" && <InsightsView insights={props.insights} />}
 
           {tab === "generators" && (

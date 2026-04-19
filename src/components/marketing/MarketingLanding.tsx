@@ -77,7 +77,7 @@ export function MarketingLanding() {
         <div className="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1.25fr_1fr]">
           <div>
             <h1 className="font-display text-[44px] font-bold leading-[1.05] tracking-tight text-un-forest sm:text-[56px] md:text-[60px]">
-              Every generator. Every threshold.{" "}
+              Every generator in MA + VT. Every threshold.{" "}
               <span className="italic">Every nearest processor.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-un-ink-soft">

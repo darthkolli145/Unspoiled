@@ -57,12 +57,6 @@ export function SiteNav() {
         <div className="flex items-center gap-3 text-[14px] font-medium">
           <Link
             href="/dashboard"
-            className="hidden rounded-full px-4 py-2 text-un-ink-soft transition hover:text-un-forest lg:inline"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/dashboard"
             className="inline-flex items-center gap-1 rounded-full bg-un-coral-500 px-5 py-2.5 font-semibold text-white shadow-[0_10px_24px_rgba(214,78,42,0.25)] transition hover:-translate-y-px hover:bg-un-coral-600"
           >
             Open dashboard

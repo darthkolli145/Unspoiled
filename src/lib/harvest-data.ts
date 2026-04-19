@@ -121,8 +121,8 @@ export interface LeadQuery {
 }
 
 function tierForScore(score: number): LeadTier {
-  if (score >= 70) return "A";
-  if (score >= 50) return "B";
+  if (score >= 75) return "A";
+  if (score >= 70) return "B";
   return "C";
 }
 

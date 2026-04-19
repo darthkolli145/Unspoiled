@@ -136,11 +136,11 @@ export default function StateIndexPage() {
                 <span className="italic">tightening</span> trajectory.
               </h1>
               <p className="mt-5 text-[16px] leading-relaxed text-un-ink-soft">
-                Every U.S. state with an active organic-waste ban is loaded
-                into Unspoiled. Below, each card is the real arc of that
-                state&rsquo;s threshold plus the policy effect sizes the
-                Dryad study actually records. Click any card for the full
-                briefing.
+                All five U.S. states with an active organic-waste ban are
+                indexed here for threshold trajectories and policy effect sizes.
+                Full generator rosters are currently live for MA + VT, with
+                other states marked as roster pending. Click any card for the
+                full briefing.
               </p>
             </div>
             <Leaf size={120} aria-hidden className="hidden lg:block un-float" />

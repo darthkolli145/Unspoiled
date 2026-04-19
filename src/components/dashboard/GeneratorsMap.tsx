@@ -44,6 +44,14 @@ export function GeneratorsMap({
     new Map(),
   );
   const processorsByIdRef = useRef<Map<string, Processor>>(new Map());
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+  // Tracks the last (points reference, layerMode) we auto-fit for. Only refit
+  // when one of those genuinely changes — never on selection, which must not
+  // move the map.
+  const fitSignatureRef = useRef<string | null>(null);
 
   const [ready, setReady] = useState(false);
   const [layerMode, setLayerMode] = useState<
@@ -200,7 +208,7 @@ export function GeneratorsMap({
           fillColor: color,
           fillOpacity,
         });
-        marker.on("click", () => onSelect(g.id));
+        marker.on("click", () => onSelectRef.current(g.id));
         marker.bindTooltip(
           `<div style="font:12px var(--font-body, sans-serif);">
             <b>${g.stateId} · ${g.id}</b><br/>
@@ -218,14 +226,20 @@ export function GeneratorsMap({
         bounds.push([g.lat, g.lon]);
       }
 
-      if (bounds.length && mapRef.current) {
+      const sig = `${points.length}:${layerMode}`;
+      if (
+        bounds.length &&
+        mapRef.current &&
+        fitSignatureRef.current !== sig
+      ) {
         mapRef.current.fitBounds(bounds as [number, number][], {
           padding: [32, 32],
           animate: false,
         });
+        fitSignatureRef.current = sig;
       }
     })();
-  }, [points, layerMode, ready, onSelect, maxEnforcement]);
+  }, [points, layerMode, ready, maxEnforcement]);
 
   // Render processors once (they don't change with filters).
   useEffect(() => {

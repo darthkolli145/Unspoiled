@@ -1,57 +1,39 @@
 "use client";
 
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceLine,
-  ResponsiveContainer,
-} from "recharts";
-import { UnitDetail } from "@/lib/types";
-import { format } from "date-fns";
+import type { BuildingDetail } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
-interface Props {
-  detail: UnitDetail;
-}
+const LEVEL_COLOR: Record<string, string> = {
+  critical: "bg-red-500",
+  elevated: "bg-amber-400",
+  moderate: "bg-yellow-500",
+  low:      "bg-emerald-500",
+};
+const LEVEL_TEXT: Record<string, string> = {
+  critical: "text-red-400",
+  elevated: "text-amber-400",
+  moderate: "text-yellow-400",
+  low:      "text-emerald-400",
+};
 
-export function AnomalyScoreChart({ detail }: Props) {
-  const data = detail.scores.map((s) => ({
-    label: format(new Date(s.timestamp), "HH:mm"),
-    deviation: s.pctDeviation,
-  }));
-
+export function AnomalyScoreChart({ detail }: { detail: BuildingDetail }) {
+  const floors = [...detail.floorStress].reverse();
   return (
-    <ResponsiveContainer width="100%" height={180}>
-      <AreaChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-        <defs>
-          <linearGradient id="deviationGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#f97316" stopOpacity={0.02} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-        <XAxis dataKey="label" tick={{ fill: "#71717a", fontSize: 11 }} interval={3} />
-        <YAxis tick={{ fill: "#71717a", fontSize: 11 }} unit="%" width={45} />
-        <Tooltip
-          contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 6 }}
-          labelStyle={{ color: "#a1a1aa" }}
-          formatter={(val) => { const n = Number(val); return [`${n >= 0 ? "+" : ""}${n.toFixed(1)}%`, "Deviation"]; }}
-        />
-        <ReferenceLine y={15} stroke="#eab308" strokeDasharray="3 3" label={{ value: "Warning", fill: "#eab308", fontSize: 10 }} />
-        <ReferenceLine y={30} stroke="#ef4444" strokeDasharray="3 3" label={{ value: "Critical", fill: "#ef4444", fontSize: 10 }} />
-        <ReferenceLine y={0} stroke="#3f3f46" />
-        <Area
-          type="monotone"
-          dataKey="deviation"
-          stroke="#f97316"
-          strokeWidth={2}
-          fill="url(#deviationGradient)"
-          name="Deviation"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div className="space-y-1.5">
+      {floors.map((f) => (
+        <div key={f.floor} className="flex items-center gap-2">
+          <span className="w-20 shrink-0 text-right text-[10px] text-zinc-600">{f.label}</span>
+          <div className="flex-1 h-3 overflow-hidden rounded-sm bg-zinc-800">
+            <div
+              className={cn("h-full rounded-sm transition-all", LEVEL_COLOR[f.level])}
+              style={{ width: `${f.stress * 100}%`, opacity: 0.55 + f.stress * 0.35 }}
+            />
+          </div>
+          <span className={cn("w-14 shrink-0 text-right text-[10px] font-medium tabular-nums", LEVEL_TEXT[f.level])}>
+            {(f.stress * 100).toFixed(0)}%
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }

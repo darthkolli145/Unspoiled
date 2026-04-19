@@ -1,84 +1,68 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { UnitSummary } from "@/lib/types";
+import type { BuildingSummary } from "@/lib/types";
 import { SummaryCards } from "./SummaryCards";
-import { FilterBar } from "./FilterBar";
+import { FilterBar, type PortfolioFilters } from "./FilterBar";
 import { UnitsTable } from "./UnitsTable";
-import { DetailPanel } from "@/components/detail/DetailPanel";
+import { BuildingDetailPanel } from "@/components/detail/DetailPanel";
 import { RefreshCw } from "lucide-react";
 
-interface Filters {
-  suite: string;
-  acNumber: string;
-  status: string;
-}
-
 export function DashboardShell() {
-  const [allUnits, setAllUnits] = useState<UnitSummary[]>([]);
+  const [all, setAll] = useState<BuildingSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({ suite: "all", acNumber: "all", status: "all" });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<PortfolioFilters>({ city: "all", level: "all" });
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchUnits = useCallback(async () => {
+  const fetchPortfolio = useCallback(async () => {
     try {
-      const res = await fetch("/api/units");
-      const data: UnitSummary[] = await res.json();
-      setAllUnits(data);
+      const params = new URLSearchParams({ city: filters.city, level: filters.level });
+      const res = await fetch(`/api/portfolio?${params}`);
+      const data: BuildingSummary[] = await res.json();
+      setAll(data);
       setLastUpdated(new Date());
     } catch {
-      // silently keep stale data
+      // keep stale data
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
-    fetchUnits();
-    const interval = setInterval(fetchUnits, 60_000);
-    return () => clearInterval(interval);
-  }, [fetchUnits]);
+    fetchPortfolio();
+    const id = setInterval(fetchPortfolio, 60_000);
+    return () => clearInterval(id);
+  }, [fetchPortfolio]);
 
-  const filtered = allUnits.filter((u) => {
-    if (filters.suite !== "all" && u.unit.suite !== filters.suite) return false;
-    if (filters.acNumber !== "all" && String(u.unit.acNumber) !== filters.acNumber) return false;
-    if (filters.status !== "all" && u.latestScore.status !== filters.status) return false;
-    return true;
-  });
-
-  const selectedUnit = allUnits.find((u) => u.unit.id === selectedUnitId) ?? null;
+  const selected = all.find((s) => s.building.id === selectedId) ?? null;
 
   return (
     <div className="space-y-5">
-      <SummaryCards units={allUnits} />
+      <SummaryCards summaries={all} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar filters={filters} onChange={setFilters} />
         <div className="flex items-center gap-3 text-xs text-zinc-500">
-          <span className="tabular-nums">
-            {filtered.length} of {allUnits.length} units
-          </span>
+          <span className="tabular-nums">{all.length} structures</span>
           <span className="h-3 w-px bg-zinc-800" />
           <span className="inline-flex items-center gap-1.5">
             <RefreshCw className="h-3 w-3" />
-            {lastUpdated
-              ? `Updated ${lastUpdated.toLocaleTimeString()}`
-              : "Loading…"}
+            {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
           </span>
         </div>
       </div>
 
       <UnitsTable
-        units={filtered}
+        summaries={all}
         loading={loading}
-        selectedUnitId={selectedUnitId}
-        onSelect={(id) => setSelectedUnitId(selectedUnitId === id ? null : id)}
+        selectedId={selectedId}
+        onSelect={(id) => setSelectedId(selectedId === id ? null : id)}
       />
 
-      <DetailPanel
-        selected={selectedUnit}
-        onClose={() => setSelectedUnitId(null)}
+      <BuildingDetailPanel
+        selected={selected}
+        onClose={() => setSelectedId(null)}
       />
     </div>
   );

@@ -1,37 +1,36 @@
 import Link from "next/link";
 import {
   Activity,
-  AirVent,
   ArrowRight,
+  BarChart3,
   Building2,
   Check,
-  Cpu,
-  Gauge,
-  LineChart,
+  ChevronRight,
+  Clock,
+  Database,
+  FileText,
+  Globe,
   Lock,
   Shield,
   Terminal,
-  Thermometer,
-  Wind,
   Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/marketing/SiteNav";
-import { BackgroundPaths } from "@/components/ui/background-paths";
+import ShaderBackground from "@/components/ui/shader-background";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
       <Hero />
+      <LogoStrip />
       <ProductGrid />
-      <CustomerMarquee />
-      <BackboneSection />
+      <TechnicalSection />
       <CapabilitiesSplit />
       <PillarsSection />
       <DeveloperSection />
       <TestimonialSection />
       <EnterpriseSection />
-      <GlobalLogos />
       <FinalCTA />
       <SiteFooter />
     </div>
@@ -40,53 +39,72 @@ export default function Home() {
 
 function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black pt-28 pb-28 md:pt-36 md:pb-36">
-      <BackgroundPaths />
+    <section
+      className="relative isolate overflow-hidden pt-28 pb-24 md:pt-36 md:pb-32"
+      style={{
+        background:
+          "radial-gradient(ellipse 100% 60% at 70% -5%, rgba(59,130,246,0.12) 0%, transparent 55%), #000",
+      }}
+    >
+      <ShaderBackground />
 
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid gap-16 md:grid-cols-12 md:items-center">
-          <div className="md:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/70 backdrop-blur-sm">
+          <div className="md:col-span-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/25 bg-blue-500/8 px-3 py-1 text-xs font-medium text-blue-300 backdrop-blur-sm">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-50" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                <span className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-400" />
               </span>
-              PowerSense v2 · now generally available
+              Now processing USGS ShakeMaps in real time
             </div>
-            <h1 className="mt-6 text-[52px] font-light leading-[0.98] tracking-[-0.02em] text-white md:text-[80px]">
-              Intelligent
+
+            <h1 className="mt-6 text-[52px] font-light leading-[0.96] tracking-[-0.025em] text-white md:text-[76px]">
+              Insurance priced
               <br />
-              infrastructure
+              to the physics
               <br />
-              to protect every
-              <br />
-              building
+              of every building
             </h1>
-            <p className="mt-8 max-w-xl text-lg font-light text-white/50 md:text-xl">
-              Join the operators, owners, and portfolio managers who use
-              PowerSense to monitor HVAC and electrical systems in real time,
-              catch anomalies before tenants notice, and reduce energy spend
-              across every unit.
+
+            <p className="mt-8 max-w-lg text-lg font-light text-zinc-500 md:text-xl">
+              Seismic is a parametric insurance API for REITs and commercial
+              carriers. We model building-specific structural resonance and
+              trigger automated payouts — without a single claims adjuster.
             </p>
+
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link
-                href="/dashboard"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-black transition hover:bg-white/90"
+                href="#contact"
+                className="group inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition hover:bg-blue-500"
               >
-                Open dashboard
+                Request API access
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </Link>
               <Link
-                href="#contact"
-                className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 px-5 py-3 text-sm font-medium text-white/70 transition hover:border-white/30 hover:text-white"
+                href="#docs"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-6 py-3 text-sm font-medium text-white/60 transition hover:border-white/25 hover:text-white"
               >
-                Contact sales
+                View docs
               </Link>
+            </div>
+
+            <div className="mt-12 flex flex-wrap gap-8 border-t border-white/5 pt-10">
+              {[
+                { value: "$4.2B", label: "Portfolio value modeled" },
+                { value: "< 4 min", label: "Avg. payout trigger time" },
+                { value: "96%", label: "Model accuracy vs. post-event surveys" },
+              ].map(({ value, label }) => (
+                <div key={label}>
+                  <div className="text-2xl font-light tracking-tight text-white">{value}</div>
+                  <div className="mt-0.5 text-xs font-medium text-zinc-600">{label}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="md:col-span-5">
-            <HeroDevice />
+          <div className="md:col-span-6">
+            <RiskCard />
           </div>
         </div>
       </div>
@@ -94,94 +112,118 @@ function Hero() {
   );
 }
 
-function HeroDevice() {
+function RiskCard() {
+  const wavePoints = [50,52,49,55,53,60,68,74,65,58,72,85,92,78,62,88,96,82,70,75,68,60,55,58,52,50,54,51];
+  const max = Math.max(...wavePoints);
+  const w = 280; const h = 80;
+  const points = wavePoints.map((v, i) => `${(i / (wavePoints.length - 1)) * w},${h - (v / max) * h * 0.85}`).join(" ");
+
   return (
-    <div className="relative mx-auto w-full max-w-[360px] ps-float">
-      <div className="relative overflow-hidden rounded-[38px] border border-white/10 bg-white/5 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] backdrop-blur-md">
-        <div className="rounded-[32px] bg-zinc-950 p-5 shadow-inner">
-          <div className="flex items-center justify-between text-[11px] text-zinc-500">
-            <div className="flex items-center gap-1.5 font-medium text-white">
-              <Zap className="h-3.5 w-3.5 text-white" />
-              PowerSense
-            </div>
-            <div className="flex items-center gap-1.5 text-zinc-500">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-white opacity-40" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white opacity-60" />
-              </span>
-              Live
-            </div>
-          </div>
+    <div className="relative mx-auto w-full max-w-[480px] ps-float">
+      <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-zinc-950 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)]">
 
-          <div className="mt-5">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-zinc-600">
-              Building A · Suite 204
-            </div>
-            <div className="mt-1.5 flex items-baseline gap-2">
-              <div className="text-[38px] font-light leading-none tracking-tight text-white">
-                72.4
-              </div>
-              <div className="text-sm text-zinc-600">°F setpoint</div>
-            </div>
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium text-white/60">
-              <Check className="h-3 w-3" /> Operating normally
-            </div>
+        <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-blue-400" />
+            <span className="text-sm font-medium text-white/60">Seismic · Risk Assessment</span>
           </div>
+          <div className="flex items-center gap-1.5 text-xs text-white/35">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            Live feed
+          </div>
+        </div>
 
-          <div className="mt-5 rounded-2xl bg-zinc-900 p-3">
-            <div className="mb-2 flex items-center justify-between text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-              <span>Draw · 24h</span>
-              <span className="text-white/60">4.2 kW avg</span>
+        <div className="px-5 pt-5">
+          <div className="text-[11px] font-semibold uppercase tracking-widest text-zinc-600">Target address</div>
+          <div className="mt-1 text-base font-medium text-white">350 Mission St, San Francisco, CA</div>
+          <div className="mt-0.5 text-xs text-zinc-600">48-floor · RC shear wall · Built 2017</div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-px bg-white/5 border-y border-white/5">
+          {[
+            { label: "Risk Score", value: "0.73", sub: "High", color: "text-red-400" },
+            { label: "Est. Premium", value: "$1,240", sub: "/ month", color: "text-white" },
+            { label: "Payout Cap", value: "$8.4M", sub: "parametric", color: "text-white" },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} className="bg-zinc-950 px-4 py-4">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">{label}</div>
+              <div className={`mt-1 text-xl font-light ${color}`}>{value}</div>
+              <div className="text-[10px] text-zinc-600">{sub}</div>
             </div>
-            <svg viewBox="0 0 220 80" className="h-20 w-full">
+          ))}
+        </div>
+
+        <div className="px-5 pt-5">
+          <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
+            <span>Resonance profile · 0.1–2.0 Hz</span>
+            <span className="font-mono text-zinc-700">alpa(ti) decay</span>
+          </div>
+          <div className="mt-3 overflow-hidden rounded-xl bg-zinc-900 p-4">
+            <svg viewBox={`0 0 ${w} ${h}`} className="h-20 w-full" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="hero-g1" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="white" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="white" stopOpacity="0" />
+                <linearGradient id="wave-fill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path
-                d="M0 62 L22 54 L44 58 L66 42 L88 46 L110 32 L132 38 L154 24 L176 28 L198 18 L220 22 L220 80 L0 80 Z"
-                fill="url(#hero-g1)"
-              />
-              <path
-                d="M0 62 L22 54 L44 58 L66 42 L88 46 L110 32 L132 38 L154 24 L176 28 L198 18 L220 22"
-                fill="none"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeOpacity="0.6"
-                strokeLinecap="round"
-              />
+              <polygon points={`0,${h} ${points} ${w},${h}`} fill="url(#wave-fill)" />
+              <polyline points={points} fill="none" stroke="#60a5fa" strokeWidth="1.5"
+                strokeOpacity="0.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
+        </div>
 
-          <div className="mt-4 space-y-2">
-            {[
-              { label: "AC-1 · Rooftop", draw: "3.8 kW" },
-              { label: "AC-2 · Mezzanine", draw: "6.1 kW" },
-              { label: "AC-3 · Server rm.", draw: "4.4 kW" },
-            ].map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-zinc-900 px-3 py-2.5 text-[13px]"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white/40" />
-                  <span className="text-zinc-400">{row.label}</span>
+        <div className="mt-4 space-y-1.5 px-5 pb-5">
+          {[
+            { zone: "Floors 40–48", stress: "Critical", pct: 88, color: "bg-red-500" },
+            { zone: "Floors 20–39", stress: "Moderate", pct: 45, color: "bg-amber-400" },
+            { zone: "Floors 1–19",  stress: "Low",      pct: 22, color: "bg-emerald-500" },
+          ].map(({ zone, stress, pct, color }) => (
+            <div key={zone} className="flex items-center gap-3 rounded-lg border border-white/5 bg-zinc-900 px-3 py-2.5">
+              <div className="w-28 text-xs text-zinc-500">{zone}</div>
+              <div className="flex-1">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%`, opacity: 0.65 }} />
                 </div>
-                <span className="font-mono text-xs font-medium text-white">
-                  {row.draw}
-                </span>
               </div>
-            ))}
-          </div>
+              <div className="w-16 text-right text-xs text-zinc-500">{stress}</div>
+            </div>
+          ))}
+        </div>
 
-          <button className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black">
-            View all units <ArrowRight className="h-3.5 w-3.5" />
+        <div className="border-t border-white/5 px-5 py-4">
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white shadow-[0_4px_14px_rgba(59,130,246,0.3)] transition hover:bg-blue-500">
+            Generate full report <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function LogoStrip() {
+  const names = [
+    "Blackstone RE","Prologis","Vornado","SL Green",
+    "Cushman & Wakefield","CBRE","JLL","Brookfield",
+    "Mack-Cali","Equinix","Kilroy Realty","Hudson Pacific",
+  ];
+  const doubled = [...names, ...names];
+  return (
+    <section className="relative overflow-hidden border-y border-white/5 bg-zinc-950 py-9">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-zinc-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-zinc-950 to-transparent" />
+      <div className="mb-4 text-center text-[11px] font-semibold uppercase tracking-widest text-zinc-700">
+        Trusted by leading REITs and commercial carriers
+      </div>
+      <div className="flex w-max ps-marquee gap-14 px-6 text-zinc-600">
+        {doubled.map((n, i) => (
+          <span key={i} className="shrink-0 text-[15px] font-light tracking-tight">{n}</span>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -191,238 +233,166 @@ function ProductGrid() {
       <div className="grid gap-10 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-6">
           <h2 className="text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[52px]">
-            Flexible monitoring built to scale across every building
+            Physics-driven risk modeling at building scale
           </h2>
         </div>
-        <div className="md:col-span-6 md:pt-4">
+        <div className="md:col-span-6 md:pt-3">
           <p className="text-lg font-light text-zinc-500">
-            PowerSense is a single platform for HVAC and electrical telemetry.
-            Plug into the equipment you already operate, detect drift in
-            real-time, and uncover the efficiency gains hidden in your
-            portfolio — without a forklift upgrade.
+            Traditional underwriting uses regional hazard maps. Seismic uses
+            high-resolution Scripps synthetic seismograms matched to USGS 3D
+            building geometries — down to individual floor plates and foundation mass.
           </p>
-          <Link
-            href="#"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition hover:text-white"
-          >
-            Browse all products <ArrowRight className="h-4 w-4" />
+          <Link href="#" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition hover:text-white">
+            Explore the platform <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
 
       <div className="mt-16 grid gap-6 md:grid-cols-3">
-        <ProductCard
-          eyebrow="Live telemetry"
-          title="Stream every sensor, from every unit, in real time."
-          bullets={["BACnet", "Modbus", "MQTT", "Webhooks", "Historian"]}
-          illustration={<TelemetryArt />}
-        />
-        <ProductCard
-          eyebrow="Anomaly detection"
-          title="Catch failures before a single tenant picks up the phone."
-          bullets={["Scoring", "Baselines", "Alerting", "Runbooks"]}
-          illustration={<AnomalyArt />}
-        />
-        <ProductCard
-          eyebrow="Energy insights"
-          title="Attribute usage, forecast cost, and prove savings."
-          bullets={["Metering", "Tariffs", "EIA pricing", "Per-tenant", "Reports"]}
-          illustration={<EnergyArt />}
-        />
+        {[
+          { eyebrow: "Resonance modeling", title: "Building-specific structural stress from first principles.", bullets: ["Scripps seismograms","USGS geometries","PyTorch backend","alpa(ti) decay"], art: <ResonanceArt /> },
+          { eyebrow: "Parametric pricing", title: "Premiums that reflect the real physics of your portfolio.", bullets: ["Per-floor risk scoring","Foundation mass analysis","Frequency matching","Live recalibration"], art: <PricingArt /> },
+          { eyebrow: "Instant payouts", title: "Automated liquidity triggered the moment ground motion is detected.", bullets: ["Sub-4-minute triggers","No claims adjusters","Blockchain audit trail","SWIFT / ACH"], art: <PayoutArt /> },
+        ].map(({ eyebrow, title, bullets, art }) => (
+          <article key={eyebrow} className="group rounded-3xl border border-white/5 bg-zinc-900 p-5 transition duration-300 hover:-translate-y-1 hover:border-white/10">
+            <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-zinc-800 flex items-center justify-center">
+              {art}
+              <div className="absolute left-4 top-4">
+                <span className="inline-flex items-center rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/50 backdrop-blur-sm">
+                  {eyebrow}
+                </span>
+              </div>
+            </div>
+            <h3 className="mt-6 text-[20px] font-normal leading-[1.2] tracking-[-0.01em] text-white">{title}</h3>
+            <ul className="mt-4 flex flex-wrap gap-1.5">
+              {bullets.map((b) => (
+                <li key={b} className="rounded-full border border-white/8 bg-white/4 px-2.5 py-1 text-[11px] font-medium text-zinc-500">{b}</li>
+              ))}
+            </ul>
+            <Link href="#" className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-zinc-400 transition hover:text-white group-hover:gap-2">
+              Learn more <ArrowRight className="h-4 w-4" />
+            </Link>
+          </article>
+        ))}
       </div>
     </section>
   );
 }
 
-function ProductCard({
-  eyebrow,
-  title,
-  bullets,
-  illustration,
-}: {
-  eyebrow: string;
-  title: string;
-  bullets: string[];
-  illustration: React.ReactNode;
-}) {
+function ResonanceArt() {
+  const freqs = [0.3,0.5,0.4,0.8,1.1,0.9,0.6,1.4,1.8,1.6,1.2,0.9,0.7,0.5,0.4];
+  const w = 220; const h = 90;
+  const pts = freqs.map((v, i) => `${(i/(freqs.length-1))*w},${h/2+Math.sin(i*1.3)*v*28}`).join(" ");
   return (
-    <article className="group rounded-3xl border border-white/5 bg-zinc-900 p-5 transition duration-300 hover:-translate-y-1 hover:border-white/10">
-      <div className="relative h-52 w-full overflow-hidden rounded-2xl bg-zinc-800">
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          {illustration}
-        </div>
-        <div className="absolute left-4 top-4">
-          <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/70 backdrop-blur-sm">
-            {eyebrow}
-          </span>
-        </div>
-      </div>
-      <h3 className="mt-6 text-[22px] font-normal leading-[1.15] tracking-[-0.01em] text-white">
-        {title}
-      </h3>
-      <ul className="mt-4 flex flex-wrap gap-1.5">
-        {bullets.map((b) => (
-          <li
-            key={b}
-            className="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-zinc-400"
-          >
-            {b}
-          </li>
-        ))}
-      </ul>
-      <Link
-        href="#"
-        className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-zinc-400 transition hover:text-white group-hover:gap-2"
-      >
-        Learn more <ArrowRight className="h-4 w-4" />
-      </Link>
-    </article>
-  );
-}
-
-function TelemetryArt() {
-  return (
-    <svg viewBox="0 0 200 120" className="h-full w-full opacity-60">
-      <g fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-        <path d="M0 90 Q50 70 100 82 T200 60" opacity="0.9" />
-        <path d="M0 70 Q50 50 100 62 T200 40" opacity="0.6" />
-        <path d="M0 50 Q50 30 100 42 T200 20" opacity="0.35" />
-      </g>
-      {[{ x: 40, y: 82 }, { x: 90, y: 70 }, { x: 140, y: 52 }, { x: 180, y: 36 }].map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="4" fill="#fff" stroke="rgba(255,255,255,0.3)" strokeWidth="4" />
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-full w-full opacity-60" preserveAspectRatio="xMidYMid meet">
+      <polyline points={pts} fill="none" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      {freqs.map((v, i) => (
+        <circle key={i} cx={(i/(freqs.length-1))*w} cy={h/2+Math.sin(i*1.3)*v*28}
+          r="2.5" fill="#93c5fd" opacity={0.3 + Math.abs(v)*0.35} />
       ))}
     </svg>
   );
 }
 
-function AnomalyArt() {
+function PricingArt() {
+  const bars = [35,52,41,68,55,80,62,91,74,85];
   return (
-    <svg viewBox="0 0 200 120" className="h-full w-full opacity-60">
-      <g fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-        <path d="M10 80 L40 70 L70 78 L100 40 L130 88 L160 60 L190 64" />
-      </g>
-      <circle cx="100" cy="40" r="18" fill="#fff" fillOpacity="0.1" />
-      <circle cx="100" cy="40" r="10" fill="#fff" fillOpacity="0.8" />
-      <g fill="#fff">
-        <rect x="10" y="98" width="32" height="5" rx="2.5" opacity="0.4" />
-        <rect x="48" y="98" width="24" height="5" rx="2.5" opacity="0.25" />
-        <rect x="78" y="98" width="40" height="5" rx="2.5" opacity="0.4" />
-      </g>
-    </svg>
-  );
-}
-
-function EnergyArt() {
-  const bars = [30, 55, 42, 70, 58, 82, 65, 95, 78];
-  return (
-    <svg viewBox="0 0 200 120" className="h-full w-full opacity-60">
+    <svg viewBox="0 0 220 90" className="h-full w-full opacity-50">
       {bars.map((h, i) => (
-        <rect key={i} x={10 + i * 21} y={110 - h} width="14" height={h} rx="3"
-          fill="#fff" opacity={0.2 + (i / bars.length) * 0.5} />
+        <rect key={i} x={8+i*21} y={90-h} width="14" height={h} rx="3" fill="white" opacity={0.15 + (i/bars.length)*0.45} />
       ))}
-      <path d="M10 90 Q60 60 110 50 T200 20" stroke="#fff" strokeWidth="2"
-        fill="none" strokeLinecap="round" opacity="0.7" />
+      <polyline points={bars.map((h,i)=>`${15+i*21},${90-h}`).join(" ")}
+        fill="none" stroke="white" strokeWidth="1.5" strokeOpacity="0.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function CustomerMarquee() {
-  const names = [
-    "Ridgeview Properties", "Northgate REIT", "Harbor Industrial",
-    "Vertex Campus", "Meridian Health", "Ashford Labs",
-    "Brightline", "Summit Group", "Keystone Holdings",
-    "Cascadia Realty", "Lakeshore Towers", "Fairmark",
-  ];
-  const doubled = [...names, ...names];
+function PayoutArt() {
   return (
-    <section className="relative overflow-hidden border-y border-white/5 bg-zinc-950 py-10">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-zinc-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-zinc-950 to-transparent" />
-      <div className="flex w-max ps-marquee gap-12 px-6 text-white/30">
-        {doubled.map((n, i) => (
-          <span key={i} className="shrink-0 text-[17px] font-light tracking-tight">{n}</span>
-        ))}
-      </div>
-    </section>
+    <svg viewBox="0 0 220 90" className="h-full w-full opacity-50">
+      <circle cx="110" cy="45" r="32" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.2" />
+      <circle cx="110" cy="45" r="22" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.35" />
+      <circle cx="110" cy="45" r="12" fill="white" fillOpacity="0.7" />
+      <path d="M110 13 L110 3 M110 87 L110 77 M142 45 L152 45 M78 45 L68 45" stroke="white" strokeWidth="1" strokeOpacity="0.25" strokeLinecap="round" />
+      <path d="M40 45 L62 45 M158 45 L180 45" stroke="white" strokeWidth="1" strokeOpacity="0.2" strokeLinecap="round" strokeDasharray="4 3" />
+      <text x="110" y="49" textAnchor="middle" fontSize="8" fill="black" fontWeight="700">PAID</text>
+    </svg>
   );
 }
 
-function BackboneSection() {
+function TechnicalSection() {
   return (
-    <section className="bg-black py-24 md:py-32">
+    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6 text-center">
-        <h2 className="text-[48px] font-light leading-[1.03] tracking-[-0.02em] text-white md:text-[72px]">
-          The backbone of
+        <div className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">The model</div>
+        <h2 className="text-[44px] font-light leading-[1.03] tracking-[-0.02em] text-white md:text-[68px]">
+          From seismogram
           <br />
-          building intelligence
+          to payout in minutes
         </h2>
         <p className="mx-auto mt-8 max-w-2xl text-lg font-light text-zinc-500">
-          From single-site operators to multi-campus portfolios, teams choose
-          PowerSense to keep critical HVAC and electrical infrastructure
-          humming — twenty-four hours a day, every day of the year.
+          Our PyTorch-accelerated backend processes localized structural stress using the algorithmic decay variable{" "}
+          <span className="font-mono text-blue-400">alpa_(ti)</span> to model low-frequency wave impact on large-mass foundations.
         </p>
-        <div className="mt-20 grid gap-16 md:grid-cols-3">
-          <BigStat value="12K+" label="Rooftop and split units under continuous monitoring" />
-          <BigStat value="99.95%" label="Telemetry uptime measured across the past twelve months" />
-          <BigStat value="22%" label="Average reduction in HVAC energy spend after ninety days" />
+
+        <div className="mt-20 grid gap-1 md:grid-cols-4">
+          {[
+            { step: "01", label: "Scripps seismogram ingestion", desc: "High-resolution synthetic ground motion data for the target site" },
+            { step: "02", label: "USGS 3D geometry matching", desc: "Building-specific structural model from Microsoft and USGS datasets" },
+            { step: "03", label: "PyTorch stress simulation", desc: "alpa(ti) decay applied to calculate per-floor resonance and stress" },
+            { step: "04", label: "Parametric trigger issued", desc: "Policy priced and payout authorized — fully automated" },
+          ].map(({ step, label, desc }, i) => (
+            <div key={step} className="relative border border-white/5 bg-zinc-900 p-7 text-left first:rounded-l-2xl last:rounded-r-2xl">
+              {i < 3 && (
+                <div className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 translate-x-1/2 md:block">
+                  <ArrowRight className="h-4 w-4 text-zinc-700" />
+                </div>
+              )}
+              <div className="font-mono text-[13px] font-bold text-blue-500">{step}</div>
+              <div className="mt-3 text-[15px] font-medium leading-snug text-white">{label}</div>
+              <p className="mt-2 text-[13px] font-light leading-relaxed text-zinc-600">{desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function BigStat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <div className="text-[76px] font-light leading-none tracking-[-0.03em] text-white md:text-[96px]">
-        {value}
-      </div>
-      <div className="mx-auto mt-5 max-w-[260px] text-sm font-light leading-relaxed text-zinc-500">
-        {label}
-      </div>
-    </div>
   );
 }
 
 function CapabilitiesSplit() {
   return (
-    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
+    <section className="border-t border-white/5 bg-black py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-16 md:grid-cols-12 md:items-center">
           <div className="order-2 md:order-1 md:col-span-6">
-            <PortfolioIllustration />
+            <CityscapeIllustration />
           </div>
           <div className="order-1 md:order-2 md:col-span-6">
-            <div className="mb-4 text-[13px] font-semibold uppercase tracking-wider text-zinc-500">
-              Portfolio scale
+            <div className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
+              Building intelligence
             </div>
-            <h2 className="text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[52px]">
-              Powerful APIs for every HVAC and electrical system in your portfolio
+            <h2 className="text-[38px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[50px]">
+              Every floor plate modeled. Every foundation mass accounted for.
             </h2>
             <p className="mt-6 text-lg font-light text-zinc-500">
-              PowerSense normalizes telemetry from the equipment you already
-              own — VRFs, RTUs, chillers, sub-meters — and turns it into a
-              single, clean API. Start monitoring a new building in hours, not quarters.
+              Seismic ingests USGS 3D structural geometries and matches them against Scripps synthetic seismograms at the site level. Underwriters get per-floor stress profiles — not regional averages — in seconds.
             </p>
             <ul className="mt-8 space-y-3">
               {[
-                "BACnet, Modbus, and MQTT ingestion for existing equipment",
-                "SOC 2 Type II certified data handling with tenant-level access",
-                "Anomaly scoring trained on billions of sensor readings",
-                "Edge-buffered gateways so nothing is lost when WAN drops",
+                "Microsoft + USGS 3D geometry database, 280K+ structures",
+                "Low-frequency (0.1–2.0 Hz) wave modeling for high-rise mass",
+                "alpa(ti) decay variable calibrated on 40 years of USGS records",
+                "Live recalibration on new ShakeMap event data",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15">
-                    <Check className="h-3 w-3 text-white" />
+                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/12">
+                    <Check className="h-3 w-3 text-white/60" />
                   </div>
                   <span className="text-zinc-400">{item}</span>
                 </li>
               ))}
             </ul>
-            <Link
-              href="/dashboard"
-              className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition hover:text-white"
-            >
+            <Link href="/dashboard" className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition hover:text-white">
               Explore the dashboard <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -432,75 +402,138 @@ function CapabilitiesSplit() {
   );
 }
 
-function PortfolioIllustration() {
+function CityscapeIllustration() {
+  const PIXEL = 8;
+  const GAP = 2;
+  const UNIT = PIXEL + GAP;
+  const SVG_W = 560;
+  const SVG_H = 360;
+
+  const hash = (a: number, b: number, c: number) => (a * 31 + b * 17 + c * 13) % 100;
+
+  type BuildingDef = {
+    x: number; cols: number; rows: number;
+    type: "safe" | "critical" | "stripes" | "mixed";
+    label?: string;
+  };
+
+  const buildings: BuildingDef[] = [
+    { x: 8,   cols: 5,  rows: 16, type: "safe",     label: "SAFE STRUCTURE" },
+    { x: 74,  cols: 7,  rows: 22, type: "safe" },
+    { x: 162, cols: 14, rows: 33, type: "critical",  label: "CRITICAL HAZARD" },
+    { x: 332, cols: 9,  rows: 23, type: "stripes" },
+    { x: 442, cols: 8,  rows: 20, type: "safe",     label: "SAFE STRUCTURE" },
+  ];
+
   return (
-    <div className="relative aspect-[5/4] overflow-hidden rounded-3xl border border-white/5 bg-zinc-900">
-      <div className="absolute inset-0 grid grid-cols-4 gap-3 p-6">
-        {Array.from({ length: 12 }).map((_, i) => {
-          const heights = [60, 85, 72, 95, 68, 80, 90, 75, 88, 65, 78, 92];
-          const opacities = [0.3, 0.5, 0.4, 0.6, 0.35, 0.5, 0.55, 0.45, 0.6, 0.3, 0.5, 0.65];
+    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-zinc-950">
+      <div className="flex items-center justify-between border-b border-white/5 px-5 py-3">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+          Portfolio risk map · 5 assets · San Francisco CBD
+        </span>
+        <div className="flex items-center gap-3 text-[10px] text-zinc-600">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-red-700" /> Critical
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-emerald-800" /> Safe
+          </span>
+        </div>
+      </div>
+
+      <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="w-full" preserveAspectRatio="xMidYMax meet">
+        {/* ground line */}
+        <line x1="0" y1={SVG_H - 2} x2={SVG_W} y2={SVG_H - 2} stroke="white" strokeOpacity="0.04" strokeWidth="1" />
+
+        {buildings.map((b, bi) => {
+          const bw = b.cols * UNIT - GAP;
+          const bh = b.rows * UNIT - GAP;
+          const topY = SVG_H - bh - 2;
+          const cx = b.x + bw / 2;
+
+          const pixels: React.ReactNode[] = [];
+          for (let r = 0; r < b.rows; r++) {
+            for (let c = 0; c < b.cols; c++) {
+              if (hash(bi, r, c) < 10) continue; // ~10% gap for mosaic texture
+              const floorRatio = (b.rows - 1 - r) / (b.rows - 1); // 0=top row, 1=bottom
+              const heightFrac = 1 - floorRatio; // 1=top, 0=bottom
+
+              let fill: string;
+              if (b.type === "critical") {
+                fill = heightFrac > 0.55 ? "#7a1a1a" : "#8f2424";
+              } else if (b.type === "safe") {
+                fill = heightFrac > 0.5 ? "#1a4a2a" : "#215c34";
+              } else if (b.type === "stripes") {
+                fill = r % 2 === 0 ? "#1a4a2a" : "#7a1a1a";
+              } else {
+                fill = heightFrac > 0.5 ? "#7a1a1a" : "#1a4a2a";
+              }
+
+              const opacity = 0.75 + (hash(r, c, bi * 3) % 25) / 100;
+              pixels.push(
+                <rect
+                  key={`${bi}-${r}-${c}`}
+                  x={b.x + c * UNIT} y={topY + r * UNIT}
+                  width={PIXEL} height={PIXEL}
+                  rx={1} fill={fill} opacity={opacity}
+                />
+              );
+            }
+          }
+
           return (
-            <div key={i} className="flex items-end">
-              <div
-                className="w-full rounded-t-lg bg-white"
-                style={{ height: `${heights[i]}%`, opacity: opacities[i % opacities.length] }}
-              />
-            </div>
+            <g key={bi}>
+              {pixels}
+              {b.label && (
+                <text
+                  x={cx} y={topY + bh / 2 + 3}
+                  textAnchor="middle"
+                  fontSize="5.5"
+                  fill="white"
+                  fillOpacity="0.35"
+                  fontFamily="monospace"
+                  fontWeight="700"
+                  letterSpacing="0.8"
+                >
+                  {b.label}
+                </text>
+              )}
+            </g>
           );
         })}
-      </div>
-      <div className="absolute left-6 right-6 bottom-6 h-[1px] bg-white/10" />
-      <div className="absolute right-6 top-6 flex items-center gap-2 rounded-full border border-white/10 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white/70">
-        <Building2 className="h-3.5 w-3.5 text-white/50" />
-        48 buildings · live
-      </div>
+      </svg>
     </div>
   );
 }
 
 function PillarsSection() {
   const pillars = [
-    { icon: Thermometer, title: "Climate", desc: "Track temperature, humidity, and setpoints across every zone with sub-minute resolution and full historical replay." },
-    { icon: Wind, title: "HVAC health", desc: "Continuous anomaly scoring for compressors, fans, and airflow so you can service equipment before it fails." },
-    { icon: Gauge, title: "Energy", desc: "Attribute consumption to tenants, benchmark against peers, and cut waste with intelligent scheduling." },
-    { icon: Shield, title: "Reliability", desc: "Real-time alerting with on-call rotations, incident timelines, and post-mortem reports out of the box." },
+    { icon: Database, title: "Scripps + USGS data", desc: "High-resolution synthetic seismograms and 3D building geometries updated continuously from authoritative sources." },
+    { icon: BarChart3, title: "Resonance engine", desc: "PyTorch-accelerated structural simulation with the alpa(ti) decay variable tuned for large-mass foundations." },
+    { icon: Zap, title: "Parametric triggers", desc: "Policy payouts fire automatically on ground motion exceedance — no adjuster, no delay, no dispute." },
+    { icon: Globe, title: "Portfolio API", desc: "Batch-assess entire REIT portfolios in a single API call. Risk scores, premiums, and payout caps in one response." },
   ];
   return (
-    <section className="border-t border-white/5 bg-black py-24 md:py-32">
+    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 text-[13px] font-semibold uppercase tracking-wider text-zinc-500">
-            A unified platform
-          </div>
+          <div className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">A unified platform</div>
           <h2 className="text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[52px]">
-            Everything you need to operate a smarter building
+            Everything underwriters need in one API
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg font-light text-zinc-500">
-            Whether you run a single-tenant office or a national portfolio,
-            PowerSense is built to help your operations team move faster with fewer surprises.
+            From a single high-rise to a 300-asset portfolio, Seismic gives commercial
+            carriers and REITs the data they need to price, bind, and pay — instantly.
           </p>
         </div>
         <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {pillars.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="group rounded-2xl border border-white/5 bg-zinc-900 p-6 transition hover:-translate-y-0.5 hover:border-white/10"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-zinc-800 transition group-hover:bg-zinc-700">
-                <Icon className="h-5 w-5 text-white/70" />
+            <div key={title} className="group rounded-2xl border border-white/5 bg-zinc-900 p-6 transition hover:-translate-y-0.5 hover:border-white/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/8 bg-zinc-800 transition group-hover:bg-zinc-700">
+                <Icon className="h-5 w-5 text-white/50" />
               </div>
-              <h3 className="mt-5 text-[18px] font-medium tracking-tight text-white">
-                {title}
-              </h3>
-              <p className="mt-2 text-[14px] font-light leading-relaxed text-zinc-500">
-                {desc}
-              </p>
-              <Link
-                href="/dashboard"
-                className="mt-5 inline-flex items-center gap-1 text-[13px] font-medium text-zinc-500 transition hover:text-white group-hover:gap-1.5"
-              >
-                Learn more <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              <h3 className="mt-5 text-[17px] font-medium tracking-tight text-white">{title}</h3>
+              <p className="mt-2 text-[13px] font-light leading-relaxed text-zinc-500">{desc}</p>
             </div>
           ))}
         </div>
@@ -511,41 +544,33 @@ function PillarsSection() {
 
 function DeveloperSection() {
   return (
-    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
+    <section className="border-t border-white/5 bg-black py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-14 md:grid-cols-12 md:items-center">
-          <div className="md:col-span-6">
-            <div className="mb-4 inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="md:col-span-5">
+            <div className="mb-4 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
               <Terminal className="h-4 w-4" />
               Built for builders
             </div>
-            <h2 className="text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[52px]">
-              An API designed around the equipment you already run
+            <h2 className="text-[38px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[50px]">
+              One API call. Full risk profile.
             </h2>
             <p className="mt-6 text-lg font-light text-zinc-500">
-              PowerSense exposes every sensor, anomaly, and event over a
-              clean REST and webhook API. Forward telemetry to your warehouse,
-              trigger your own runbooks, or embed live status into an existing tenant portal.
+              POST an address and building specs. Get back a structured risk assessment, premium recommendation, and payout trigger thresholds.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="#docs"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black hover:bg-white/90"
-              >
+              <Link href="#docs" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-[0_0_18px_rgba(59,130,246,0.3)] hover:bg-blue-500">
                 Read docs <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/5"
-              >
+              <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full border border-white/12 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/5">
                 Try the dashboard
               </Link>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 border-t border-white/5 pt-8">
               {[
-                { icon: Cpu, label: "Edge gateways" },
-                { icon: LineChart, label: "Realtime API" },
-                { icon: AirVent, label: "BACnet ready" },
+                { icon: Clock, label: "< 400ms p99" },
+                { icon: FileText, label: "REST + webhooks" },
+                { icon: Shield, label: "SOC 2 Type II" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex items-center gap-2 text-zinc-600">
                   <Icon className="h-4 w-4 text-zinc-500" />
@@ -554,8 +579,8 @@ function DeveloperSection() {
               ))}
             </div>
           </div>
-          <div className="md:col-span-6">
-            <CodeCard />
+          <div className="md:col-span-7">
+            <ApiCard />
           </div>
         </div>
       </div>
@@ -563,69 +588,82 @@ function DeveloperSection() {
   );
 }
 
-function CodeCard() {
-  const lines: { code: string; tone?: "comment" | "flag" | "value" }[] = [
-    { code: "curl https://api.powersense.io/v1/units \\" },
-    { code: "  -H 'Authorization: Bearer ps_live_***' \\", tone: "flag" },
-    { code: "  -G \\", tone: "flag" },
-    { code: "  --data-urlencode 'building=building-a' \\", tone: "value" },
-    { code: "  --data-urlencode 'status=anomaly'", tone: "value" },
-    { code: "" },
-    { code: "# → 3 units flagged in the last 15 minutes", tone: "comment" },
+function ApiCard() {
+  const request = [
+    { code: "curl https://api.seismic.io/v1/assess \\" },
+    { code: "  -H 'Authorization: Bearer sk_live_***' \\", tone: "flag" },
+    { code: "  -H 'Content-Type: application/json' \\", tone: "flag" },
+    { code: "  -d '{", tone: "value" },
+    { code: '    "address": "350 Mission St, SF, CA",', tone: "value" },
+    { code: '    "floors": 48,', tone: "value" },
+    { code: '    "structure": "rc_shear_wall"', tone: "value" },
+    { code: "  }'", tone: "value" },
+  ];
+  const response = [
+    { code: "{", tone: "value" },
+    { code: '  "risk_score": 0.73,', tone: "value" },
+    { code: '  "status": "high",', tone: "danger" },
+    { code: '  "premium_usd": 1240,', tone: "value" },
+    { code: '  "payout_cap_usd": 8400000,', tone: "value" },
+    { code: '  "trigger_pgv_cms": 12.4,', tone: "value" },
+    { code: '  "peak_stress_floor": 46,', tone: "danger" },
+    { code: '  "model": "scripps-v3 + alpa_decay"', tone: "comment" },
+    { code: "}", tone: "value" },
   ];
   const toneClass = (t?: string) =>
-    t === "comment" ? "text-white/30"
-    : t === "flag" ? "text-white/70"
-    : t === "value" ? "text-white/50"
-    : "text-white/90";
+    t === "comment" ? "text-emerald-500/60"
+    : t === "flag"  ? "text-amber-400/70"
+    : t === "danger"? "text-red-400/70"
+    : t === "value" ? "text-zinc-400"
+    : "text-zinc-200";
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/8 bg-black shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
-      <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-white/20" />
-          <span className="h-3 w-3 rounded-full bg-white/15" />
-          <span className="h-3 w-3 rounded-full bg-white/10" />
-          <span className="ml-3 font-mono text-xs text-white/25">
-            ~/powersense — 80×24
-          </span>
-        </div>
-        <span className="rounded-full border border-white/8 px-2 py-0.5 font-mono text-[10px] text-white/30">
-          bash
-        </span>
-      </div>
-      <div className="p-6 font-mono text-[13px] leading-7">
-        {lines.map(({ code, tone }, i) => (
-          <div key={i} className="flex gap-4">
-            <span className="w-5 shrink-0 select-none text-white/15">{i + 1}</span>
-            <code className={`whitespace-pre ${toneClass(tone)}`}>{code || " "}</code>
+    <div className="grid gap-3 md:grid-cols-2">
+      {[{ title: "Request", lines: request }, { title: "Response", lines: response }].map(({ title, lines }) => (
+        <div key={title} className="overflow-hidden rounded-2xl border border-white/8 bg-zinc-950">
+          <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500/50" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-400/50" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/50" />
+            </div>
+            <span className="font-mono text-[10px] text-zinc-600">{title}</span>
           </div>
-        ))}
-      </div>
+          <div className="p-4 font-mono text-[11px] leading-6">
+            {lines.map(({ code, tone }, i) => (
+              <div key={i} className="flex gap-3">
+                <span className="w-4 shrink-0 select-none text-zinc-700">{i+1}</span>
+                <code className={`whitespace-pre ${toneClass(tone)}`}>{code}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
 function TestimonialSection() {
   return (
-    <section className="border-t border-white/5 bg-black py-24 md:py-32">
+    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
       <div className="mx-auto max-w-5xl px-6">
         <div className="rounded-3xl border border-white/8 bg-zinc-900 p-10 md:p-16">
-          <div className="mb-6 text-[13px] font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="mb-6 text-[11px] font-semibold uppercase tracking-widest text-zinc-600">
             Customer story
           </div>
-          <blockquote className="text-[28px] font-light leading-[1.25] tracking-tight text-white md:text-[36px]">
-            "PowerSense flagged an AC compressor drift on a Saturday night
-            before tenants ever felt the temperature swing. That alert alone
-            paid for the year."
+          <blockquote className="text-[26px] font-light leading-[1.3] tracking-tight text-white md:text-[34px]">
+            "Seismic repriced our entire West Coast portfolio in 40 minutes. The
+            per-floor stress profiles caught a risk concentration in two towers
+            our legacy carrier had rated as standard for a decade."
           </blockquote>
           <div className="mt-8 flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-zinc-800 text-white">
-              <Building2 className="h-4 w-4 text-white/60" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-zinc-800">
+              <Building2 className="h-4 w-4 text-white/40" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">Priya Anand</div>
-              <div className="text-xs font-light text-zinc-500">
-                Director of Operations · Ridgeview Properties
+              <div className="text-sm font-semibold text-white">Marcus Chen</div>
+              <div className="text-xs font-light text-zinc-600">
+                Chief Risk Officer · Northgate REIT · 48-asset West Coast portfolio
               </div>
             </div>
           </div>
@@ -637,53 +675,26 @@ function TestimonialSection() {
 
 function EnterpriseSection() {
   const rows = [
-    { icon: Lock, title: "Enterprise-grade security", desc: "SOC 2 Type II certified data handling with tenant-level access controls, audit logs, and encryption at rest and in transit." },
-    { icon: Zap, title: "99.95% telemetry uptime", desc: "Edge-buffered gateways keep collecting even when WAN links drop, so your data never has gaps when you need it most." },
-    { icon: Activity, title: "Unrivaled observability", desc: "Dashboards, anomaly scores, and event timelines show you exactly what every unit is doing — down to the second." },
+    { icon: Lock, title: "Enterprise security", desc: "SOC 2 Type II certified. All seismogram data and building geometries encrypted at rest and in transit with tenant-level isolation." },
+    { icon: Clock, title: "Real-time seismic feeds", desc: "Continuous ingestion of USGS ShakeMaps and Scripps updates. Risk profiles recalibrate automatically on new event data." },
+    { icon: FileText, title: "Full audit trail", desc: "Every pricing decision, trigger event, and payout transaction is logged immutably — audit-ready for regulators and carriers." },
   ];
   return (
-    <section className="border-t border-white/5 bg-zinc-950 py-24 md:py-32">
+    <section className="border-t border-white/5 bg-black py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-[40px] font-light leading-[1.05] tracking-[-0.02em] text-white md:text-[52px]">
-            Made for the most demanding operators
+            Built for the scrutiny of institutional underwriting
           </h2>
         </div>
         <div className="mt-16 grid gap-5 md:grid-cols-3">
           {rows.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-white/5 bg-zinc-900 p-8 transition hover:border-white/10"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-800">
-                <Icon className="h-5 w-5 text-white/60" />
+            <div key={title} className="rounded-2xl border border-white/5 bg-zinc-900 p-8 transition hover:border-white/10">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/8 bg-zinc-800">
+                <Icon className="h-5 w-5 text-white/50" />
               </div>
-              <h3 className="mt-6 text-[20px] font-medium tracking-tight text-white">{title}</h3>
+              <h3 className="mt-6 text-[19px] font-medium tracking-tight text-white">{title}</h3>
               <p className="mt-3 font-light text-zinc-500">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function GlobalLogos() {
-  const partners = [
-    "Ridgeview", "Northgate", "Harbor", "Vertex",
-    "Meridian", "Ashford", "Brightline", "Summit",
-    "Keystone", "Cascadia", "Lakeshore", "Fairmark",
-  ];
-  return (
-    <section className="border-t border-white/5 bg-black py-20">
-      <div className="mx-auto max-w-7xl px-6">
-        <p className="text-center text-[13px] font-semibold uppercase tracking-wider text-zinc-700">
-          Trusted by operators and owners of every size
-        </p>
-        <div className="mt-10 grid grid-cols-3 gap-x-8 gap-y-6 md:grid-cols-6">
-          {partners.map((p) => (
-            <div key={p} className="flex items-center justify-center text-[17px] font-light tracking-tight text-zinc-700">
-              {p}
             </div>
           ))}
         </div>
@@ -694,32 +705,25 @@ function GlobalLogos() {
 
 function FinalCTA() {
   return (
-    <section
-      id="contact"
-      className="border-t border-white/5 bg-zinc-950 py-28 md:py-36"
-    >
-      <div className="mx-auto max-w-5xl px-6 text-center">
-        <h2 className="text-[52px] font-light leading-[1.03] tracking-[-0.02em] text-white md:text-[80px]">
-          Ready to see
+    <section id="contact" className="relative overflow-hidden border-t border-white/5 bg-zinc-950 py-28 md:py-36">
+      <div className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(ellipse 70% 50% at 50% 100%, rgba(59,130,246,0.08) 0%, transparent 60%)" }} />
+      <div className="relative mx-auto max-w-5xl px-6 text-center">
+        <h2 className="text-[50px] font-light leading-[1.03] tracking-[-0.025em] text-white md:text-[76px]">
+          Ready to price your
           <br />
-          your buildings?
+          portfolio to physics?
         </h2>
-        <p className="mx-auto mt-8 max-w-2xl text-lg font-light text-zinc-500">
-          Spin up the PowerSense dashboard in minutes — or talk to us about a
-          custom rollout across your portfolio.
+        <p className="mx-auto mt-8 max-w-xl text-lg font-light text-zinc-500">
+          Get API access and a complimentary risk assessment of up to 10 buildings.
+          No commitment. Results in under 24 hours.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-black hover:bg-white/90"
-          >
-            Open dashboard <ArrowRight className="h-4 w-4" />
+          <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-7 py-3.5 text-sm font-medium text-white shadow-[0_0_24px_rgba(59,130,246,0.35)] hover:bg-blue-500">
+            Request API access <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link
-            href="mailto:hello@powersense.io"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white hover:bg-white/5"
-          >
-            Contact sales
+          <Link href="mailto:hello@seismic.io" className="inline-flex items-center gap-2 rounded-full border border-white/12 px-7 py-3.5 text-sm font-medium text-white hover:bg-white/5">
+            Talk to sales
           </Link>
         </div>
       </div>
@@ -729,70 +733,47 @@ function FinalCTA() {
 
 function SiteFooter() {
   const cols: { title: string; links: { label: string; href: string }[] }[] = [
-    {
-      title: "Products",
-      links: [
-        { label: "Telemetry", href: "#" },
-        { label: "Anomaly detection", href: "#" },
-        { label: "Energy insights", href: "#" },
-        { label: "Alerting", href: "#" },
-        { label: "Reports", href: "#" },
-        { label: "Tenant portal", href: "#" },
-      ],
-    },
-    {
-      title: "Solutions",
-      links: [
-        { label: "Commercial real estate", href: "#" },
-        { label: "Industrial", href: "#" },
-        { label: "Healthcare", href: "#" },
-        { label: "Multi-campus", href: "#" },
-        { label: "Portfolio operators", href: "#" },
-      ],
-    },
-    {
-      title: "Developers",
-      links: [
-        { label: "Documentation", href: "#" },
-        { label: "API reference", href: "#" },
-        { label: "System status", href: "#" },
-        { label: "Changelog", href: "#" },
-        { label: "Integrations", href: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { label: "Support", href: "#" },
-        { label: "Guides", href: "#" },
-        { label: "Customer stories", href: "#" },
-        { label: "Blog", href: "#" },
-        { label: "Contact sales", href: "#contact" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About", href: "#" },
-        { label: "Careers", href: "#" },
-        { label: "Newsroom", href: "#" },
-        { label: "Partners", href: "#" },
-      ],
-    },
+    { title: "Platform", links: [
+      { label: "Resonance modeling", href: "#" },
+      { label: "Parametric pricing", href: "#" },
+      { label: "Automated payouts", href: "#" },
+      { label: "Portfolio API", href: "#" },
+      { label: "Dashboard", href: "/dashboard" },
+    ]},
+    { title: "Data sources", links: [
+      { label: "Scripps seismograms", href: "#" },
+      { label: "USGS 3D geometries", href: "#" },
+      { label: "ShakeMap feeds", href: "#" },
+      { label: "Microsoft building data", href: "#" },
+    ]},
+    { title: "Developers", links: [
+      { label: "API reference", href: "#" },
+      { label: "Documentation", href: "#" },
+      { label: "Changelog", href: "#" },
+      { label: "System status", href: "#" },
+      { label: "SDKs", href: "#" },
+    ]},
+    { title: "Company", links: [
+      { label: "About", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Research", href: "#" },
+      { label: "Contact", href: "#contact" },
+      { label: "Security", href: "#" },
+    ]},
   ];
   return (
     <footer className="border-t border-white/5 bg-black py-20">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-10 md:grid-cols-6">
+        <div className="grid gap-10 md:grid-cols-5">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 text-[17px] font-semibold tracking-tight text-white">
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white text-black">
-                <Zap className="h-4 w-4" strokeWidth={2.2} />
+              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-600">
+                <Activity className="h-4 w-4 text-white" strokeWidth={2.5} />
               </span>
-              PowerSense
+              Seismic
             </div>
             <p className="mt-4 text-sm font-light text-zinc-700">
-              United States (English)
+              Physics-driven parametric insurance for commercial real estate.
             </p>
           </div>
           {cols.map((col) => (
@@ -801,9 +782,7 @@ function SiteFooter() {
               <ul className="mt-4 space-y-3 text-sm font-light text-zinc-600">
                 {col.links.map((l) => (
                   <li key={l.label}>
-                    <Link href={l.href} className="transition hover:text-white">
-                      {l.label}
-                    </Link>
+                    <Link href={l.href} className="transition hover:text-white">{l.label}</Link>
                   </li>
                 ))}
               </ul>
@@ -811,13 +790,11 @@ function SiteFooter() {
           ))}
         </div>
         <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-8 text-sm text-zinc-700">
-          <div>© {new Date().getFullYear()} PowerSense Technologies, Inc.</div>
+          <div>© {new Date().getFullYear()} Seismic Technologies, Inc.</div>
           <div className="flex flex-wrap gap-6">
-            <Link href="#" className="hover:text-white">Privacy</Link>
-            <Link href="#" className="hover:text-white">Terms</Link>
-            <Link href="#" className="hover:text-white">Security</Link>
-            <Link href="#" className="hover:text-white">Sitemap</Link>
-            <Link href="/dashboard" className="hover:text-white">Dashboard</Link>
+            {["Privacy","Terms","Security","Sitemap"].map((l) => (
+              <Link key={l} href="#" className="hover:text-white">{l}</Link>
+            ))}
           </div>
         </div>
       </div>

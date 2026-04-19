@@ -1,216 +1,157 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { FcuRow, parseFcuCsv } from "@/lib/fcu";
-import { FcuCurrentReading } from "./FcuCurrentReading";
-import { FcuLiveFeed } from "./FcuLiveFeed";
-import { FcuAlertBanner } from "./FcuAlertBanner";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Upload, FileText, Gauge } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import type { SeismicEvent } from "@/lib/types";
+import { RefreshCw, Zap, Radio, Activity } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const FEED_SIZE = 30;
-const SPEED_OPTIONS = [1, 5, 10, 20] as const;
+function fmtTime(iso: string) {
+  const d = new Date(iso);
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  const diffH = diffMs / 3_600_000;
+  if (diffH < 1) return `${Math.round(diffH * 60)}m ago`;
+  if (diffH < 24) return `${Math.round(diffH)}h ago`;
+  return `${Math.round(diffH / 24)}d ago`;
+}
 
-interface Alert {
-  label: string;
-  time: string;
-  key: number;
+function MagBadge({ mag }: { mag: number }) {
+  const color = mag >= 5 ? "text-red-400 bg-red-500/10 ring-red-500/25"
+    : mag >= 4 ? "text-amber-400 bg-amber-500/10 ring-amber-500/25"
+    : "text-zinc-400 bg-zinc-500/10 ring-zinc-500/20";
+  return (
+    <span className={cn("inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold ring-1 ring-inset", color)}>
+      {mag.toFixed(1)}
+    </span>
+  );
+}
+
+function StatusPill({ status }: { status: SeismicEvent["status"] }) {
+  if (status === "triggered") return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400 ring-1 ring-inset ring-red-500/25">
+      <Zap className="h-2.5 w-2.5" /> Triggered
+    </span>
+  );
+  if (status === "monitoring") return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400 ring-1 ring-inset ring-amber-500/25">
+      <Radio className="h-2.5 w-2.5" /> Monitoring
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-400 ring-1 ring-inset ring-zinc-500/20">
+      <Activity className="h-2.5 w-2.5" /> Cleared
+    </span>
+  );
 }
 
 export function FcuShell() {
-  const [rows, setRows] = useState<FcuRow[] | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [index, setIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState<number>(5);
-  const [alert, setAlert] = useState<Alert | null>(null);
-  const [feed, setFeed] = useState<FcuRow[]>([]);
+  const [events, setEvents] = useState<SeismicEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const rowsRef = useRef<FcuRow[]>([]);
-  const indexRef = useRef(0);
-  const prevLabelRef = useRef("Normal condition");
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const alertKeyRef = useRef(0);
-
-  useEffect(() => { indexRef.current = index; }, [index]);
-
-  const tick = useCallback(() => {
-    const allRows = rowsRef.current;
-    const cur = indexRef.current;
-    if (cur >= allRows.length - 1) {
-      setPlaying(false);
-      return;
+  const fetchEvents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/events");
+      const data: SeismicEvent[] = await res.json();
+      setEvents(data);
+      setLastUpdated(new Date());
+    } catch {
+      // keep stale
+    } finally {
+      setLoading(false);
     }
-    const next = cur + 1;
-    const row = allRows[next];
-    if (row.status !== "normal" && row.label !== prevLabelRef.current) {
-      alertKeyRef.current += 1;
-      setAlert({ label: row.label, time: row.time, key: alertKeyRef.current });
-    }
-    prevLabelRef.current = row.label;
-    setIndex(next);
-    setFeed((prev) => [...prev.slice(-(FEED_SIZE - 1)), row]);
   }, []);
 
   useEffect(() => {
-    if (playing) {
-      intervalRef.current = setInterval(tick, 1000 / speed);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [playing, speed, tick]);
+    fetchEvents();
+    const id = setInterval(fetchEvents, 60_000);
+    return () => clearInterval(id);
+  }, [fetchEvents]);
 
-  function loadFile(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const parsed = parseFcuCsv(text);
-      rowsRef.current = parsed;
-      setRows(parsed);
-      setFileName(file.name);
-      setIndex(0);
-      setFeed([parsed[0]]);
-      setPlaying(false);
-      setAlert(null);
-      prevLabelRef.current = "Normal condition";
-    };
-    reader.readAsText(file);
-  }
-
-  function reset() {
-    setPlaying(false);
-    setIndex(0);
-    setFeed(rows ? [rows[0]] : []);
-    prevLabelRef.current = "Normal condition";
-    setAlert(null);
-  }
-
-  const currentRow = rows?.[index] ?? null;
-  const prevRow = rows && index > 0 ? rows[index - 1] : null;
-  const progress = rows && rows.length > 1 ? (index / (rows.length - 1)) * 100 : 0;
-  const isFinished = rows ? index >= rows.length - 1 : false;
+  const triggered  = events.filter((e) => e.status === "triggered");
+  const monitoring = events.filter((e) => e.status === "monitoring");
+  const totalPayout = triggered.reduce((s, e) => s + (e.payoutUsd ?? 0), 0);
 
   return (
-    <div className="space-y-4">
-      {/* Control bar — always visible */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3">
+    <div className="space-y-5">
+      {/* Summary strip */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[
+          { label: "Events (30d)",     value: String(events.length),          tone: "zinc" },
+          { label: "Triggered",        value: String(triggered.length),        tone: "red"  },
+          { label: "Monitoring",       value: String(monitoring.length),       tone: "amber"},
+          { label: "Total payouts",    value: `$${(totalPayout/1_000_000).toFixed(2)}M`, tone: "blue" },
+        ].map(({ label, value, tone }) => (
+          <div key={label} className={cn(
+            "rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3",
+          )}>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-600">{label}</div>
+            <div className={cn(
+              "mt-1.5 text-2xl font-light tabular-nums",
+              tone === "red" ? "text-red-300" : tone === "amber" ? "text-amber-300" : tone === "blue" ? "text-blue-300" : "text-zinc-100",
+            )}>{value}</div>
+          </div>
+        ))}
+      </div>
 
-        {/* Upload button */}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 text-sm text-zinc-200 transition-colors"
-        >
-          <Upload className="h-3.5 w-3.5 text-zinc-400" />
-          {fileName ? (
-            <span className="flex items-center gap-1.5">
-              <FileText className="h-3 w-3 text-orange-400" />
-              <span className="max-w-[140px] truncate text-orange-300 text-xs">{fileName}</span>
-            </span>
-          ) : (
-            <span className="text-zinc-400">Upload CSV</span>
-          )}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) loadFile(f); e.target.value = ""; }}
-        />
-
-        <div className="h-4 w-px bg-zinc-700" />
-
-        {/* LIVE indicator */}
-        <div className="flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${playing ? "bg-red-500 animate-pulse" : "bg-zinc-600"}`} />
-          <span className={`text-xs font-bold tracking-widest ${playing ? "text-red-400" : "text-zinc-500"}`}>
-            {playing ? "LIVE" : isFinished ? "END" : rows ? "PAUSED" : "NO DATA"}
-          </span>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-zinc-400">Recent seismic events</h3>
+        <div className="flex items-center gap-1.5 text-xs text-zinc-600">
+          <RefreshCw className="h-3 w-3" />
+          {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
         </div>
+      </div>
 
-        {/* Play / Reset */}
-        <div className="flex items-center gap-1.5">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setPlaying((p) => !p)}
-            disabled={!rows || isFinished}
-            className="bg-zinc-800 border-zinc-700 text-zinc-200 h-8 w-8 p-0 disabled:opacity-30"
-          >
-            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={reset}
-            disabled={!rows}
-            className="bg-zinc-800 border-zinc-700 text-zinc-400 h-8 w-8 p-0 disabled:opacity-30"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-
-        {/* Speed */}
-        <div className="flex items-center gap-0.5 rounded-md border border-zinc-700 bg-zinc-800 p-0.5">
-          {SPEED_OPTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSpeed(s)}
-              disabled={!rows}
-              className={`px-2.5 py-1 text-xs rounded font-medium transition-colors disabled:opacity-30 ${
-                speed === s ? "bg-zinc-600 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {s}×
-            </button>
+      {/* Event list */}
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-20 rounded-xl border border-zinc-800 bg-zinc-900/40 animate-pulse" />
           ))}
         </div>
+      ) : (
+        <div className="space-y-2">
+          {events.map((e) => (
+            <div
+              key={e.id}
+              className={cn(
+                "relative flex items-start gap-4 rounded-xl border bg-zinc-900/40 p-4 transition",
+                e.status === "triggered" && "border-red-500/20 bg-red-500/5",
+                e.status === "monitoring" && "border-amber-500/20 bg-amber-500/5",
+                e.status === "cleared" && "border-zinc-800 hover:border-zinc-700",
+              )}
+            >
+              {e.status === "triggered" && (
+                <div className="absolute left-0 inset-y-0 w-0.5 rounded-l-xl bg-red-500" />
+              )}
 
-        {/* Row counter */}
-        {rows && (
-          <div className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500">
-            <Gauge className="h-3.5 w-3.5" />
-            <span>{index + 1} / {rows.length}</span>
-          </div>
-        )}
-      </div>
+              <MagBadge mag={e.magnitude} />
 
-      {/* Progress bar */}
-      <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-orange-500 transition-all duration-200"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-zinc-100 text-sm">{e.location}</span>
+                  <StatusPill status={e.status} />
+                </div>
 
-      {/* Alert banner */}
-      <FcuAlertBanner key={alert?.key} alert={alert} onDismiss={() => setAlert(null)} />
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500">
+                  <span>Depth <span className="text-zinc-400">{e.depthKm} km</span></span>
+                  <span>PGV <span className={cn("font-mono", e.pgvCms >= 12 ? "text-red-400" : e.pgvCms >= 8 ? "text-amber-400" : "text-zinc-400")}>{e.pgvCms} cm/s</span></span>
+                  <span>Distance <span className="text-zinc-400">{e.distanceKm} km</span></span>
+                  <span>Buildings affected <span className="text-zinc-400">{e.affectedBuildings}</span></span>
+                </div>
+              </div>
 
-      {/* Empty state */}
-      {!rows && (
-        <div
-          onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-800 py-20 cursor-pointer hover:border-zinc-600 transition-colors"
-        >
-          <div className="p-3 rounded-full bg-zinc-800">
-            <Upload className="h-6 w-6 text-zinc-500" />
-          </div>
-          <p className="text-zinc-400 text-sm">Upload a CSV to begin</p>
-          <p className="text-zinc-600 text-xs">Time · Set point temp · Return temp · Supply air · Fan · Valve · Cooling temps</p>
-        </div>
-      )}
-
-      {/* Live content */}
-      {rows && currentRow && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <FcuCurrentReading row={currentRow} prevRow={prevRow} />
-          </div>
-          <div>
-            <FcuLiveFeed feed={feed} />
-          </div>
+              <div className="text-right shrink-0">
+                <div className="text-xs text-zinc-600">{fmtTime(e.timestamp)}</div>
+                {e.payoutUsd !== null && (
+                  <div className="mt-1 font-mono text-sm text-red-300">
+                    −${(e.payoutUsd / 1000).toFixed(0)}K
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

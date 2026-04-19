@@ -131,8 +131,14 @@ def load_cities() -> pd.DataFrame:
 
 
 def load_vt_towns() -> pd.DataFrame:
+    # The raw towns_coordinates_VT.csv has 349 rows but only 326 unique towns
+    # (e.g. RUTLAND, WILLIAMSTOWN, SWANTON each have multiple lat/long rows).
+    # Without deduping, the left-merge against the VT generators frame becomes
+    # cartesian per town and duplicates every generator in those towns,
+    # producing duplicate VT-<ID> keys downstream.
     df = pd.read_csv(RAW / "towns_coordinates_VT.csv")
     df["town_key"] = df["town_name"].str.upper().str.strip()
+    df = df.drop_duplicates(subset=["town_key"], keep="first")
     return df[["town_key", "lat_gen", "long_gen"]]
 
 

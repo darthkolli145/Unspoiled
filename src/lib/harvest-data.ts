@@ -23,9 +23,24 @@ function load<T>(name: string): T {
   return JSON.parse(raw) as T;
 }
 
+function dedupeById<T extends { id: string }>(rows: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const row of rows) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    out.push(row);
+  }
+  return out;
+}
+
 function loadAll() {
-  const generators = load<Generator[]>("generators.json");
-  const processors = load<Processor[]>("processors.json");
+  // The upstream pipeline (scripts/train.py -> load_vt_towns) can emit
+  // duplicate VT-<ID> rows when a town has multiple lat/long entries in
+  // towns_coordinates_VT.csv. Deduping by id here keeps the runtime safe
+  // even if a stale generators.json is still on disk.
+  const generators = dedupeById(load<Generator[]>("generators.json"));
+  const processors = dedupeById(load<Processor[]>("processors.json"));
   const bans = load<Ban[]>("bans.json");
   const model = load<ModelMetrics>("model_metrics.json");
   const evidence = load<Evidence>("evidence.json");

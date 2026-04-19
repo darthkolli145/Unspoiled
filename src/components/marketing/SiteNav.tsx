@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronRight, Menu, Activity } from "lucide-react";
+import { Menu, Sprout } from "lucide-react";
 
-const NAV = ["Platform", "Data Sources", "API", "Underwriters", "Pricing"];
+const NAV: Array<{ label: string; href: string }> = [
+  { label: "Case study", href: "/#case-study" },
+  { label: "Solution", href: "/#solution" },
+  { label: "Market", href: "/#market" },
+  { label: "States", href: "/state" },
+  { label: "Traction", href: "/#traction" },
+];
 
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 32);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -20,7 +26,7 @@ export function SiteNav() {
     <nav
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-white/8 bg-black/85 backdrop-blur-md"
+          ? "border-b border-un-line bg-un-cream-50/95 backdrop-blur-md"
           : "bg-transparent"
       }`}
     >
@@ -28,45 +34,43 @@ export function SiteNav() {
         <div className="flex items-center gap-10">
           <Link
             href="/"
-            className="group flex items-center gap-2.5 text-[17px] font-semibold tracking-tight text-white"
+            className="group flex items-center gap-2.5 text-[19px] font-display font-bold tracking-tight text-un-forest"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white">
-              <Activity className="h-4 w-4 text-black" strokeWidth={2.5} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-un-sage-600">
+              <Sprout className="h-4 w-4 text-white" strokeWidth={2.5} />
             </span>
-            Seismic
+            Unspoiled
           </Link>
-          <ul className="hidden items-center gap-7 text-[14px] font-medium text-white/70 md:flex">
-            {NAV.map((label) => (
-              <li key={label}>
-                <Link href="#" className="transition hover:text-white">
-                  {label}
+          <ul className="hidden items-center gap-7 text-[14px] font-medium text-un-ink-soft lg:flex">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="transition hover:text-un-forest"
+                >
+                  {item.label}
                 </Link>
               </li>
             ))}
           </ul>
         </div>
-        <div className="flex items-center gap-2 text-[14px] font-medium text-white md:gap-4">
+        <div className="flex items-center gap-3 text-[14px] font-medium">
           <Link
             href="/dashboard"
-            className="hidden rounded-full px-3 py-1.5 text-white/70 transition hover:text-white md:inline"
+            className="hidden rounded-full px-4 py-2 text-un-ink-soft transition hover:text-un-forest lg:inline"
           >
             Sign in
           </Link>
           <Link
-            href="#contact"
-            className="hidden items-center gap-1 rounded-full px-3 py-1.5 text-white/70 transition hover:text-white md:inline-flex"
-          >
-            Contact sales
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-          <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-4 py-1.5 font-medium text-white shadow-[0_0_16px_rgba(59,130,246,0.35)] transition hover:bg-blue-500"
+            className="inline-flex items-center gap-1 rounded-full bg-un-coral-500 px-5 py-2.5 font-semibold text-white shadow-[0_10px_24px_rgba(214,78,42,0.25)] transition hover:-translate-y-px hover:bg-un-coral-600"
           >
-            Request access
-            <ChevronRight className="h-3.5 w-3.5" />
+            Open dashboard
           </Link>
-          <button className="rounded-full p-1.5 text-white md:hidden" aria-label="Menu">
+          <button
+            className="rounded-full p-2 text-un-forest lg:hidden"
+            aria-label="Menu"
+          >
             <Menu className="h-5 w-5" />
           </button>
         </div>

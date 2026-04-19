@@ -1,229 +1,110 @@
-# Seismic Structural Health Index (SSHI)
-### Project Specification — v0.1
-
----
-
-## Problem Statement
-
-Earthquake insurance is priced on **location, not condition.**
-
-Two identical buildings in the same ZIP code pay the same premium regardless of their actual structural history. A building that absorbed three moderate earthquakes over the past decade is priced identically to one that experienced none — even though it is meaningfully more vulnerable. Insurers have no visibility into cumulative seismic damage. They assume a building is as strong as the day it was built, forever.
-
-This creates three broken outcomes:
-
-**For insurers:** They price blind. When a major event hits, claims are larger and more widespread than models predicted because accumulated micro-damage made buildings far more vulnerable than premiums reflected. This is why insurers are exiting markets like California entirely — the models are structurally inaccurate.
-
-**For homeowners:** They have no signal that their risk has grown over time. They pay the same premium as their neighbor whose building is in better shape, with no incentive to retrofit and no warning before a catastrophic event.
-
-**For the market:** Inaccurate pricing forces insurers to either overprice to protect themselves or exit. The result is a widening coverage gap, leaving millions uninsured in the highest-risk zones.
-
-**The problem in one sentence:** Insurance is priced on where you are, not what has happened to you.
-
----
-
-## What We Are Building
-
-The **Seismic Structural Health Index (SSHI)** — a data infrastructure layer that tracks cumulative seismic impact on individual buildings over time and produces a live, updatable structural condition score.
-
-SSHI gives insurers what they have never had: an accurate, current picture of the actual risk they are covering. Not a ZIP code proxy. Not a static construction-year estimate. A dynamic building-level score that reflects real seismic history.
-
-We are not building an insurance product. We are building the data layer that makes accurate earthquake insurance possible.
-
----
-
-## Core Concept
-
-Every earthquake delivers a measurable amount of ground motion energy to a specific location. USGS publishes ShakeMap data within minutes of any event globally. If you know a building's location, construction type, and seismic history, you can model how much structural capacity it has consumed — like a fatigue model for metal. Each stress cycle degrades it incrementally. The SSHI score represents remaining structural integrity.
-
-```
-Score 90-100   Minimal seismic exposure. Near-original condition.
-Score 70-89    Moderate cumulative exposure. Monitor.
-Score 50-69    Significant degradation. Elevated risk. Inspection recommended.
-Score 30-49    High cumulative damage. Premium adjustment warranted.
-Score 0-29     Critical state. Coverage terms should reflect imminent risk.
-```
-
-The score is building-specific, continuously updated, and actuarially defensible.
-
----
-
-## How It Works
-
-### Data Inputs
-
-**Seismic Event Data**
-- USGS ShakeMap — free, near real-time, global coverage
-- Shake intensity at building location (Peak Ground Acceleration / Modified Mercalli Intensity)
-- Event magnitude, depth, distance from epicenter
-
-**Building Metadata**
-- Construction type (wood frame, concrete, masonry, steel)
-- Year built / seismic code era
-- Number of stories
-- Foundation type
-- Retrofit history
-
-**Soil and Geology Layer**
-- USGS Vs30 data (soil shear velocity — determines ground motion amplification)
-- Liquefaction susceptibility maps
-- Site class per ASCE 7
-
-**Optional: Direct Measurement**
-- IoT accelerometer sensors installed on structure
-- Real-time shake data per building during events
-- Enables highest-accuracy scoring for commercial/high-value properties
-
-### Score Calculation Model
-
-For each seismic event affecting a building:
-
-```
-Impact Factor = f(PGA, distance, soil amplification, building vulnerability class)
-Damage Increment = Impact Factor × Remaining Capacity Weight
-New Score = Current Score − Damage Increment
-```
-
-Building vulnerability class is derived from construction type and code era. Older unreinforced masonry scores highest impact per unit of ground motion. Modern code-compliant wood frame scores lowest.
-
-Score recovers partially after verified retrofit or post-event inspection showing no significant damage. Score does not recover passively over time — degradation is permanent unless physically remediated.
-
-### Premium Mapping
-
-SSHI outputs a score. Insurers map that score to premium tiers. Example framework:
-
-| Score Range | Risk Tier | Premium Modifier |
-|-------------|-----------|-----------------|
-| 85-100 | Standard | Baseline |
-| 70-84 | Elevated | +15% to +30% |
-| 55-69 | High | +40% to +70% |
-| 40-54 | Very High | +80% to +150% |
-| Below 40 | Critical | Underwriting review required |
-
-Insurers define their own tier cutoffs and modifiers. SSHI provides the score. Pricing decisions remain with the insurer.
-
----
-
-## System Architecture
-
-```
-┌─────────────────────────────────────────┐
-│           DATA INGESTION LAYER          │
-│  USGS ShakeMap API  │  Building Registry│
-│  Soil/Geology DB    │  IoT Sensor Feed  │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│           SCORING ENGINE                │
-│  Event Parser → Impact Calculator       │
-│  Building Vulnerability Model           │
-│  Cumulative Damage Tracker              │
-│  Score Generator + History Log          │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│              API LAYER                  │
-│  GET /buildings/{id}/score              │
-│  GET /buildings/{id}/history            │
-│  POST /buildings/register               │
-│  GET /events/{region}/impact            │
-│  Webhook: score_updated                 │
-└────────────────┬────────────────────────┘
-                 │
-        ┌────────┴────────┐
-        │                 │
-┌───────▼──────┐  ┌───────▼──────────┐
-│  INSURER     │  │  PROPERTY OWNER  │
-│  DASHBOARD   │  │  PORTAL          │
-│  Portfolio   │  │  My building     │
-│  risk view   │  │  score + history │
-│  Premium API │  │  Retrofit impact │
-└──────────────┘  └──────────────────┘
-```
-
----
-
-## Product Surfaces
-
-### 1. Insurer API (Primary)
-REST API that insurers integrate directly into their underwriting systems. Per-building score lookup, portfolio-level risk aggregation, webhook notifications on score changes post-event.
-
-### 2. Insurer Dashboard
-Web interface for underwriters to view portfolio exposure, filter by score tier, identify buildings that need re-underwriting after a seismic event.
-
-### 3. Property Owner Portal
-Consumer-facing interface where homeowners or commercial property owners can register their building and see their SSHI score, historical event impacts, and projected premium impact. Retrofit simulator: "If you bolt your cripple wall, your score improves by X points."
-
----
-
-## Phased Roadmap
-
-### Phase 1 — Foundation (Months 1-3)
-- USGS ShakeMap integration and event ingestion pipeline
-- Building registration system with metadata schema
-- Core scoring engine v1 (no IoT, USGS data only)
-- REST API with authentication
-- Internal testing on California building dataset
-
-### Phase 2 — Insurer Pilot (Months 4-6)
-- Insurer dashboard MVP
-- Portfolio-level scoring and export
-- Pilot with 1-2 insurance partners
-- Actuarial validation of score-to-loss correlation
-- Webhook infrastructure for real-time score updates post-event
-
-### Phase 3 — Scale and Sensors (Months 7-12)
-- Property owner portal
-- IoT sensor integration for high-value commercial properties
-- Retrofit credit system
-- Expanded geography beyond California
-- Reinsurance market integration
-
----
-
-## Key Differentiators
-
-**vs. Current Cat Models (RMS, AIR, CoreLogic)**
-Those models are event-based and probabilistic. They estimate future risk from historical frequency. SSHI tracks actual cumulative impact on actual buildings. It is empirical, not modeled.
-
-**vs. Parametric Insurance**
-Parametric triggers payment based on shake intensity thresholds. It does not feed that data back into future risk assessment. The loop is not closed. SSHI closes the loop.
-
-**vs. Manual Inspection**
-Inspections are expensive, infrequent, and subjective. SSHI is continuous, automated, and consistent across all buildings in a portfolio.
-
----
-
-## Business Model
-
-**Primary:** API access fee per building per year (B2B, insurers and reinsurers)
-
-**Secondary:** Per-query pricing for spot lookups during underwriting
-
-**Tertiary:** Premium property owner subscriptions (building owners who want continuous monitoring)
-
-**Data licensing:** Anonymized aggregate seismic impact data to research institutions, city planners, reinsurers
-
----
-
-## Validation Approach
-
-Actuarial validity is critical for insurer adoption. Validation strategy:
-
-- Backtest scoring model against USGS historical ShakeMap data and known post-earthquake damage surveys (FEMA, PEER database)
-- Correlate SSHI score at time of event to actual claim amounts from historical insurer data (via pilot partner data sharing)
-- Third-party actuarial review before commercial launch
-- Ongoing calibration as new damage data becomes available
-
----
-
-## Open Questions
-
-- What is the minimum building metadata required for a defensible score vs. what is obtainable at scale?
-- How do we handle buildings with no seismic history data prior to registration?
-- Regulatory requirements for using a proprietary score in insurance pricing (state-by-state insurance commission approval)?
-- Liability framework if a score fails to predict damage accurately?
-- Partnership vs. acquisition interest from existing cat modeling firms (RMS, Verisk)?
-
----
-
-*SSHI Project Spec v0.1 — Internal Working Document*
+# Unspoiled — Product Spec
+
+Track: **Business & Analytics**
+
+## Guiding constraint
+
+**Only work with the data we are trained on.** Every number shown must trace
+back to the Dryad OWB dataset (bzkh189h4) or to the trained PyTorch model's
+direct outputs. No synthetic tipping fees, haul rates, emissions factors, or
+fabricated testimonials. Where the study has no recorded value (e.g. MA has
+no `composting_effect`), we report a dash.
+
+## Problem
+
+Commercial food waste is a large, regulated, heterogeneous stream. Eight US
+states have organic-waste bans with tonnage and distance-to-processor
+thresholds that keep falling. Regulators, haulers, and portfolio operators
+lack a single source of truth that joins:
+
+1. Per-business generator rosters (MA DEP, VT ANR).
+2. State-level ban thresholds with explicit tonnage + distance rules.
+3. Causal effect sizes estimated in the Dryad synthetic-control study.
+4. The permitted food-scrap processor network.
+
+Unspoiled joins all four, predicts per-business tonnage with a PyTorch MLP,
+and publishes the result as a dashboard + API with zero fabricated fields.
+
+## Users
+
+| Buyer | Jobs-to-be-done |
+|-------|-----------------|
+| Commercial hauler BD | Where does real, modeled tonnage sit, and how far is the nearest processor? |
+| State / municipal compliance | Who is above the threshold today and near the next phase? |
+| REIT / operator ESG | What does the regulator's own dataset say about each of my properties? |
+
+We intentionally do not publish pricing plans because the dataset contains no
+willingness-to-pay signal.
+
+## Inputs (Dryad dataset)
+
+- `food_generators_MA.csv` — annual tons per MA business
+- `food_generators_VT.csv` — tons per week per VT business
+- `food_processors_list_MA.csv` — MA permitted processors (Category, lat, long)
+- `food_processors_list_VT.csv` — VT permitted processors with FOOD SCRAPS flag
+- `bans_thresholds.csv` — state-year tonnage + distance thresholds
+- `composting_effect.csv` — state-year causal composting effect size
+- `disposal_effect_size2.csv` — state-year causal disposal effect size
+- `uscities.csv`, `population_2020.csv` — Census population join
+- `towns_coordinates_VT.csv` — VT town lat/lon
+- `wb_enforcements.csv` — MassDEP enforcement log (row count published as
+  evidence)
+- `boulder_waste.csv` — Boulder, CO diversion by sector (time-series)
+- `seattle_composting.csv` — Seattle, WA monthly composting (time-series)
+
+## Outputs (JSON artifacts)
+
+| File | Contents |
+|------|----------|
+| `generators.json` | Per-business: tonsPerYear, predictedTonsPerYear, residualTons, compostingEffect, disposalEffect, divertedTonsPerYear (null where the study has no effect size), coveredByBan, thresholdStatus, nearestProcessor* |
+| `processors.json` | Permitted processor network |
+| `bans.json` | Latest ban threshold per state |
+| `model_metrics.json` | Training history, R² (log + raw), MAE, MAPE |
+| `evidence.json` | Per-state effect sizes, Boulder history, Seattle history, MA enforcement count, category counts, full ban history |
+
+## Model
+
+Single-task PyTorch MLP regressor:
+
+- Inputs: category embedding (12-d), state embedding (4-d), and four
+  standardized numeric features (population, lat, lon, nearest-processor km).
+- Hidden layers: 128 → 128 → 64 with ReLU + dropout 0.15.
+- Target: `log1p(tons_per_year)` winsorized at p99.5.
+- Loss: Smooth-L1; optimizer: Adam; schedule: cosine; 300 epochs.
+- Reported metrics: R² in log space ≈ 0.49, R² on raw tons ≈ 0.24, MAE ≈ 24
+  tons/year on held-out 20%.
+
+## Threshold labels
+
+- `covered_by_ban = tons ≥ banThreshold AND processorMiles ≤ banDistance`.
+- `threshold_status = above | near | below`, where `near` means
+  `tons ≥ 0.5 × banThreshold` and not covered.
+
+Both the tonnage and distance thresholds come directly from
+`bans_thresholds.csv`. The 50% cut-off is the only Unspoiled-supplied
+constant and is exposed as such in the FAQ.
+
+## Diversion estimate
+
+`divertedTonsPerYear = tonsPerYear × compostingEffect`. Both factors are from
+the Dryad study. When `compositing_effect` is null for a state (MA, CA, RI
+in the current bundle), the diverted column is null. No fallback value is
+substituted.
+
+## What Unspoiled intentionally does NOT show
+
+- $ savings — the dataset has no tipping fee or hauling rate column.
+- tCO2e avoided — the dataset has no emissions factor column.
+- Subscription prices — the dataset has no willingness-to-pay signal.
+- Customer testimonials — we have none.
+- Risk "tiers" beyond the three threshold labels — the dataset defines
+  thresholds, not tiers.
+
+## Roadmap (dataset-constrained)
+
+- Load CA, CT, and RI generator rosters once we acquire them.
+- Integrate `wb_enforcements.csv` as weak supervision for non-compliance.
+- Surface the `mc_*.csv` Monte-Carlo panels as uncertainty bands on the
+  state-level effect sizes.
+- Extend the model with per-county population density from `uscities.csv`
+  `density` column.

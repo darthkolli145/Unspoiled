@@ -1,0 +1,643 @@
+{
+  "maEnforcementActions": 933,
+  "stateEffects": [
+    {
+      "stateId": "CA",
+      "compostingEffect": null,
+      "disposalEffect": 0.144588735003612
+    },
+    {
+      "stateId": "CT",
+      "compostingEffect": 1.11509096013754,
+      "disposalEffect": 0.102915102102801
+    },
+    {
+      "stateId": "MA",
+      "compostingEffect": null,
+      "disposalEffect": 0.0932622080663716
+    },
+    {
+      "stateId": "RI",
+      "compostingEffect": null,
+      "disposalEffect": 0.0584820338445812
+    },
+    {
+      "stateId": "VT",
+      "compostingEffect": 2.6453130639817,
+      "disposalEffect": 0.214043911149803
+    }
+  ],
+  "stateTonnage": [
+    {
+      "stateId": "MA",
+      "generators": 5294,
+      "tonsPerYear": 319305.6313,
+      "predictedTonsPerYear": 238868.84375,
+      "divertedTonsPerYear": 0.0
+    },
+    {
+      "stateId": "VT",
+      "generators": 5752,
+      "tonsPerYear": 143318.218664192,
+      "predictedTonsPerYear": 73889.8671875,
+      "divertedTonsPerYear": 379121.55613897304
+    }
+  ],
+  "boulderHistory": [
+    {
+      "year": 2005,
+      "landfillTons": 166712.0,
+      "organicsTons": 13512.0,
+      "recycleTons": 21024.0,
+      "diversionRate": 0.1716
+    },
+    {
+      "year": 2006,
+      "landfillTons": 164290.0,
+      "organicsTons": 15686.0,
+      "recycleTons": 99100.0,
+      "diversionRate": 0.4113
+    },
+    {
+      "year": 2007,
+      "landfillTons": 191658.0,
+      "organicsTons": 22034.0,
+      "recycleTons": 51920.0,
+      "diversionRate": 0.2784
+    },
+    {
+      "year": 2008,
+      "landfillTons": 152446.0,
+      "organicsTons": 18162.0,
+      "recycleTons": 41552.0,
+      "diversionRate": 0.2815
+    },
+    {
+      "year": 2009,
+      "landfillTons": 173066.0,
+      "organicsTons": 29830.0,
+      "recycleTons": 50366.0,
+      "diversionRate": 0.3167
+    },
+    {
+      "year": 2010,
+      "landfillTons": 150664.0,
+      "organicsTons": 32964.0,
+      "recycleTons": 87930.0,
+      "diversionRate": 0.4452
+    },
+    {
+      "year": 2011,
+      "landfillTons": 144076.0,
+      "organicsTons": 38328.0,
+      "recycleTons": 50494.0,
+      "diversionRate": 0.3814
+    },
+    {
+      "year": 2012,
+      "landfillTons": 146260.0,
+      "organicsTons": 36116.0,
+      "recycleTons": 48174.0,
+      "diversionRate": 0.3656
+    },
+    {
+      "year": 2013,
+      "landfillTons": 155702.0,
+      "organicsTons": 30250.0,
+      "recycleTons": 40618.0,
+      "diversionRate": 0.3128
+    },
+    {
+      "year": 2014,
+      "landfillTons": 166230.0,
+      "organicsTons": 34554.0,
+      "recycleTons": 42928.0,
+      "diversionRate": 0.3179
+    },
+    {
+      "year": 2015,
+      "landfillTons": 191234.0,
+      "organicsTons": 61156.0,
+      "recycleTons": 53676.0,
+      "diversionRate": 0.3752
+    },
+    {
+      "year": 2016,
+      "landfillTons": 219124.0,
+      "organicsTons": 65322.0,
+      "recycleTons": 94910.0,
+      "diversionRate": 0.4224
+    },
+    {
+      "year": 2017,
+      "landfillTons": 179058.0,
+      "organicsTons": 63612.0,
+      "recycleTons": 100490.0,
+      "diversionRate": 0.4782
+    },
+    {
+      "year": 2018,
+      "landfillTons": 170812.0,
+      "organicsTons": 82434.0,
+      "recycleTons": 134266.0,
+      "diversionRate": 0.5592
+    },
+    {
+      "year": 2019,
+      "landfillTons": 181158.0,
+      "organicsTons": 74348.0,
+      "recycleTons": 97560.0,
+      "diversionRate": 0.4869
+    }
+  ],
+  "seattleCompostingAnnual": [
+    {
+      "year": 2003,
+      "residentialTons": 33923.0,
+      "commercialTons": 0.0,
+      "selfHaulTons": 14156.0
+    },
+    {
+      "year": 2004,
+      "residentialTons": 38484.0,
+      "commercialTons": 0.0,
+      "selfHaulTons": 14905.0
+    },
+    {
+      "year": 2005,
+      "residentialTons": 42603.0,
+      "commercialTons": 0.0,
+      "selfHaulTons": 13927.0
+    },
+    {
+      "year": 2006,
+      "residentialTons": 51538.0,
+      "commercialTons": 7403.0,
+      "selfHaulTons": 14278.0
+    },
+    {
+      "year": 2007,
+      "residentialTons": 54572.0,
+      "commercialTons": 14771.0,
+      "selfHaulTons": 14246.0
+    },
+    {
+      "year": 2008,
+      "residentialTons": 56363.0,
+      "commercialTons": 27162.0,
+      "selfHaulTons": 11892.0
+    },
+    {
+      "year": 2009,
+      "residentialTons": 74231.0,
+      "commercialTons": 31725.0,
+      "selfHaulTons": 10150.0
+    },
+    {
+      "year": 2010,
+      "residentialTons": 79952.0,
+      "commercialTons": 37100.0,
+      "selfHaulTons": 7407.0
+    },
+    {
+      "year": 2011,
+      "residentialTons": 79816.0,
+      "commercialTons": 40023.0,
+      "selfHaulTons": 6534.0
+    },
+    {
+      "year": 2012,
+      "residentialTons": 83667.0,
+      "commercialTons": 41709.0,
+      "selfHaulTons": 6332.0
+    },
+    {
+      "year": 2013,
+      "residentialTons": 82392.0,
+      "commercialTons": 44709.0,
+      "selfHaulTons": 6043.0
+    },
+    {
+      "year": 2014,
+      "residentialTons": 82589.0,
+      "commercialTons": 48587.0,
+      "selfHaulTons": 4186.0
+    },
+    {
+      "year": 2015,
+      "residentialTons": 89213.0,
+      "commercialTons": 58462.0,
+      "selfHaulTons": 4167.0
+    },
+    {
+      "year": 2016,
+      "residentialTons": 91872.0,
+      "commercialTons": 65882.0,
+      "selfHaulTons": 4393.0
+    },
+    {
+      "year": 2017,
+      "residentialTons": 90789.0,
+      "commercialTons": 80397.0,
+      "selfHaulTons": 6129.0
+    },
+    {
+      "year": 2018,
+      "residentialTons": 88948.0,
+      "commercialTons": 86235.0,
+      "selfHaulTons": 6128.0
+    },
+    {
+      "year": 2019,
+      "residentialTons": 89105.0,
+      "commercialTons": 86282.0,
+      "selfHaulTons": 6957.0
+    },
+    {
+      "year": 2020,
+      "residentialTons": 99852.0,
+      "commercialTons": 55681.0,
+      "selfHaulTons": 6780.0
+    }
+  ],
+  "banHistory": [
+    {
+      "stateId": "MA",
+      "year": 2014,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2015,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2016,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2017,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2018,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2019,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2020,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2021,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "MA",
+      "year": 2022,
+      "phase": 2,
+      "material": "food",
+      "thresholdTonsPerYear": 26.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2014,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2015,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2016,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2017,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2018,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2019,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2020,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2021,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "CT",
+      "year": 2022,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2014,
+      "phase": 1,
+      "material": "food",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2015,
+      "phase": 2,
+      "material": "food",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2016,
+      "phase": 3,
+      "material": "food",
+      "thresholdTonsPerYear": 26.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2017,
+      "phase": 4,
+      "material": "food",
+      "thresholdTonsPerYear": 18.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2018,
+      "phase": 4,
+      "material": "food",
+      "thresholdTonsPerYear": 18.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2019,
+      "phase": 4,
+      "material": "food",
+      "thresholdTonsPerYear": 18.0,
+      "distanceThresholdMiles": 20.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2020,
+      "phase": 5,
+      "material": "organic",
+      "thresholdTonsPerYear": 0.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2021,
+      "phase": 5,
+      "material": "organic",
+      "thresholdTonsPerYear": 0.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "VT",
+      "year": 2022,
+      "phase": 5,
+      "material": "organic",
+      "thresholdTonsPerYear": 0.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2016,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2017,
+      "phase": 1,
+      "material": "organic",
+      "thresholdTonsPerYear": 104.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2018,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2019,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2020,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2021,
+      "phase": 2,
+      "material": "organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "RI",
+      "year": 2022,
+      "phase": 3,
+      "material": "organic",
+      "thresholdTonsPerYear": 30.0,
+      "distanceThresholdMiles": 15.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2016,
+      "phase": 1,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 52.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2017,
+      "phase": 2,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 26.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2018,
+      "phase": 2,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 26.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2019,
+      "phase": 3,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 13.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2020,
+      "phase": 3,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 13.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2021,
+      "phase": 3,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 13.0,
+      "distanceThresholdMiles": 1000000.0
+    },
+    {
+      "stateId": "CA",
+      "year": 2022,
+      "phase": 3,
+      "material": "all_organic",
+      "thresholdTonsPerYear": 13.0,
+      "distanceThresholdMiles": 1000000.0
+    }
+  ],
+  "categoryCounts": [
+    {
+      "category": "Restaurant",
+      "generators": 6560
+    },
+    {
+      "category": "Grocery",
+      "generators": 1440
+    },
+    {
+      "category": "Hospital",
+      "generators": 883
+    },
+    {
+      "category": "FoodService",
+      "generators": 736
+    },
+    {
+      "category": "Bakery",
+      "generators": 439
+    },
+    {
+      "category": "School",
+      "generators": 373
+    },
+    {
+      "category": "Lodging",
+      "generators": 230
+    },
+    {
+      "category": "Other",
+      "generators": 138
+    },
+    {
+      "category": "College",
+      "generators": 87
+    },
+    {
+      "category": "Cafeteria",
+      "generators": 86
+    },
+    {
+      "category": "FoodManufacturer",
+      "generators": 52
+    },
+    {
+      "category": "Prison",
+      "generators": 22
+    }
+  ]
+}

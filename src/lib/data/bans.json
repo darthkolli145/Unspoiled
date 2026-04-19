@@ -1,0 +1,42 @@
+[
+  {
+    "stateId": "CA",
+    "year": 2022,
+    "phase": 3,
+    "material": "all_organic",
+    "thresholdTonsPerYear": 13.0,
+    "distanceThresholdMiles": 1000000.0
+  },
+  {
+    "stateId": "CT",
+    "year": 2022,
+    "phase": 2,
+    "material": "organic",
+    "thresholdTonsPerYear": 52.0,
+    "distanceThresholdMiles": 20.0
+  },
+  {
+    "stateId": "MA",
+    "year": 2022,
+    "phase": 2,
+    "material": "food",
+    "thresholdTonsPerYear": 26.0,
+    "distanceThresholdMiles": 1000000.0
+  },
+  {
+    "stateId": "RI",
+    "year": 2022,
+    "phase": 3,
+    "material": "organic",
+    "thresholdTonsPerYear": 30.0,
+    "distanceThresholdMiles": 15.0
+  },
+  {
+    "stateId": "VT",
+    "year": 2022,
+    "phase": 5,
+    "material": "organic",
+    "thresholdTonsPerYear": 0.0,
+    "distanceThresholdMiles": 1000000.0
+  }
+]

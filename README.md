@@ -1,155 +1,242 @@
-# Seismic
+# Unspoiled
 
-**Parametric Insurance API for Seismic Risk on High-Rise Structures**
+**Food-Waste Routing & Compliance Intelligence**
 
-Seismic models building-specific structural resonance from first principles and issues automated parametric insurance payouts — without a claims adjuster — the moment ground motion exceeds a policy threshold.
+Unspoiled turns the Dryad organic-waste-ban dataset (bzkh189h4) and a trained
+PyTorch tonnage regressor into a portfolio-level analytics surface: per-business
+tonnage forecasts, organic-waste-ban threshold labels, nearest-processor
+routing, and study-backed diversion estimates.
 
----
+**Every numeric value surfaced by the site traces back to one of three things:**
 
-## The Idea
+1. A column that exists in the Dryad dataset (`data/raw/*.csv`).
+2. A direct output of the PyTorch model (`models/unspoiled.pt`).
+3. A transformation whose inputs are both in (1) or (2) — for example,
+   `divertedTonsPerYear = tonsPerYear × compostingEffect`.
 
-Traditional earthquake insurance uses coarse regional hazard maps. Seismic prices to the physics of each individual building: its height, structure type, foundation mass, and dominant resonance frequency. A 1964 masonry tower in San Francisco has a fundamentally different risk profile than a 2017 RC shear-wall tower on the same block.
-
-We ingest Scripps synthetic seismograms and USGS 3D building geometries, run per-floor stress simulations via a PyTorch-accelerated backend using the **alpa_(ti) decay** variable, and produce a risk score, monthly premium, and payout cap — in a single API call.
-
----
-
-## Platform
-
-### Risk Dashboard
-Two-tab interface at `/dashboard`:
-
-**Portfolio tab** — All monitored buildings with live risk scores, premiums, payout caps, and trend direction. Click any row to open a detail panel showing:
-- Building metadata (structure type, floors, sqft, year built)
-- Resonance profile chart (0.05–3.0 Hz sweep, Lorentzian peak at dominant frequency)
-- Per-floor stress bars (red = critical, amber = elevated, yellow = moderate, green = low)
-- Trigger PGV threshold and payout cap
-
-**Seismic Events tab** — 30-day event feed from USGS, showing magnitude, fault location, depth, peak ground velocity, affected portfolio buildings, and payout status.
-
-### Marketing Site
-Full B2B landing page at `/` targeted at REITs and commercial carriers. Sections: hero (WebGL shader background), logo strip, product grid, technical pipeline (Scripps → USGS → PyTorch → payout), capabilities split with pixelated cityscape illustration, developer API card, testimonial, enterprise, CTA.
+There are **no invented tipping fees, hauling rates, emissions factors, or
+testimonials**. Where the Dryad study records no value (e.g. MA and CA have no
+`composting_effect` entry), Unspoiled displays a dash rather than making one
+up.
 
 ---
 
-## Data Model
+## Product
 
-| Concept | Description |
-|---------|-------------|
-| `Building` | Address, city, floors, structure type, year built, sqft |
-| `RiskScore` | 0–1 score, level (critical/elevated/moderate/low), peak stress floor, dominant Hz |
-| `Pricing` | Monthly premium (USD), payout cap (USD), trigger PGV (cm/s) |
-| `BuildingSummary` | Building + risk + pricing + trend + payout status |
-| `BuildingDetail` | Summary + per-floor stress array + resonance profile |
-| `SeismicEvent` | Magnitude, fault, depth, PGV, distance, trigger status, payout amount |
+### Operator console (`/dashboard`)
+
+- **Generators** — filterable / searchable table over every modeled business
+  with actual tonnage (dataset), predicted tonnage (model), residual (model),
+  diverted tonnage (dataset × dataset, blank when unavailable), nearest
+  processor miles (dataset), ban coverage flag (dataset thresholds), and a
+  threshold status (`above` / `near` / `below`) derived directly from
+  `bans_thresholds.csv`.
+- **Map** — Leaflet canvas map of every generator + processor, with layer
+  toggles (`All` / `At or near ban` / `Above only` / `Enforcement density`)
+  and a dashed coral polyline from any selected generator to its nearest
+  processor. Tiles: CartoDB Positron (no API key).
+- **Processor Network** — every permitted food-scrap processor in the MA and
+  VT rosters with type and location.
+- **Enforcement** — MassDEP waste-ban enforcement intelligence parsed from
+  `wb_enforcements.csv`. Summary cards (total actions, penalties, years
+  covered), per-year + per-type bar charts, top-12 towns leaderboard, and a
+  full searchable + type-filterable records table. **Important:** this is a
+  town-level rollup, not a per-business claim — see the redaction note below.
+- **Model** — predicted-vs-actual log-log scatter, metric cards, training
+  configuration, validation-loss trace.
+
+### Landing site (`/`)
+
+A Misfits-styled narrative pulling live numbers from the dataset and the
+trained model. The former testimonial and pricing-tier sections were
+replaced by dataset-backed evidence panels:
+
+- **Per-state ban effects** — the `compositing_effect` and `disposal_effect`
+  values from the Dryad CSVs, cell by cell. Blanks shown where the study has
+  no value.
+- **Boulder, CO diversion rate** — the full time-series in
+  `boulder_waste.csv`, rolled up from sector-level rows to annual totals.
+- **Seattle, WA composting** — monthly composting tons from
+  `seattle_composting.csv`, rolled up to annual totals.
+- **MA enforcement count** — the literal row count of
+  `wb_enforcements.csv`.
 
 ---
 
-## Risk Score Thresholds
+## Model
 
-| Level | Score | Typical Premium | Typical Cap |
-|-------|-------|----------------|-------------|
-| Critical | ≥ 0.70 | $2,400–$5,000/mo | $10M–$20M |
-| Elevated | 0.50–0.69 | $700–$2,400/mo | $4M–$10M |
-| Moderate | 0.33–0.49 | $200–$700/mo | $1.5M–$4M |
-| Low | < 0.33 | $80–$200/mo | $500K–$1.5M |
+A PyTorch MLP predicts `tons_per_year` for every commercial food-waste
+generator from:
+
+- **Generator category** (Restaurant, Grocery, Hospital, School, College,
+  Cafeteria, Prison, FoodService, Bakery, FoodManufacturer, Warehouse,
+  Lodging, Other) as a 12-d embedding
+- **State** as a 4-d embedding
+- **Town population** (US Census join) — log-scaled
+- **Latitude / longitude**
+- **Nearest-processor distance (km)** — log-scaled
+
+Target is `log1p(tons_per_year)` with the top 0.5% winsorized. Loss is
+Smooth-L1. Optimizer: Adam + cosine LR schedule. Architecture: 128 → 128 → 64.
+Dropout 0.15, 300 epochs, seed 42.
+
+Dataset: ~11,000 commercial generators harmonized across MA (`tons`) and VT
+(`TonsPerWeek × 52`), 80/20 train/val split.
+
+**Held-out validation metrics:**
+
+- R² (log-tonnage): ≈ 0.49
+- R² (raw tons): ≈ 0.24
+- MAE: ≈ 24 tons/year
+
+Model artifacts: `models/unspoiled.pt` (state dict + category / state
+encoders + scaler stats).
 
 ---
 
-## API Routes
+## Data files consumed
+
+| File | What Unspoiled uses from it |
+|------|-----------------------------|
+| `food_generators_MA.csv` | DEP_Code, Name, Town_City, Type, tons, Lat, Long, Status |
+| `food_generators_VT.csv` | ID, FSGName, Town, TYPE1, TYPE2, TonsPerWeek, Active |
+| `food_processors_list_MA.csv` | Number, Company, Category, Cit, lat, long |
+| `food_processors_list_VT.csv` | SWID, NAME, TYPE, FOOD SCRAPS, TOWN, Latitude, Longitude |
+| `bans_thresholds.csv` | state_id, year, phase, material, threshold, distance_threshold |
+| `composting_effect.csv` | state_id, year, composting_effect |
+| `disposal_effect_size2.csv` | state_id, year, effect_size |
+| `uscities.csv` | city_ascii, state_id, population |
+| `population_2020.csv` | (reserved for future state-level joins) |
+| `towns_coordinates_VT.csv` | town_name, lat_gen, long_gen |
+| `wb_enforcements.csv` | Row count (MA enforcement actions) |
+| `boulder_waste.csv` | Year, Landfill, Recycle, Organics by sector (annual roll-up) |
+| `seattle_composting.csv` | year, residential, commercial, self_haul (annual roll-up) |
+
+---
+
+## Enforcement layer — what's honest and what isn't
+
+`wb_enforcements.csv` contains **933 MassDEP waste-ban enforcement actions** from
+2016–2021. Every row has:
+
+- `SiteName` — **redacted on all 933 rows**
+- `Municipality` — **redacted on all 933 rows**
+- `DocumentNumber` — **redacted on all 933 rows**
+- `IssuedDate` — real
+- `EnforcementTypeDescription` — real (874 Notices Of Non-Compliance, 55
+  ACO-with-penalty, 4 other orders)
+- `ProgramCategory` — real (870 `GEN-SW`, 63 `HAULER`)
+- `PenaltyCashAssessed` — real (52 non-zero, $116,108 total assessed)
+- `Comment` — real free-text
+
+Because SiteName and Municipality are redacted, Unspoiled **does not** claim
+any individual business received an enforcement notice. Instead, we parse the
+Comment field for mentions of MA towns that also appear in the MA generator
+roster (gazetteer of 259 towns), and aggregate:
+
+- **67 MA towns** are mentioned across the log (Peabody 87, Saugus 69, North
+  Andover 67, Braintree 61, Holliston 59, …).
+- Every MA generator receives a `townEnforcementActions`,
+  `townEnforcementPenaltyUsd`, and `townEnforcementWithPenalty` — **labeled
+  explicitly as a town-level signal** in the UI.
+- VT generators always receive `0` because the dataset has no enforcement log
+  for VT.
+
+The dashboard's Enforcement tab + the detail panel's "Town-level enforcement"
+section spell out this caveat inline. Nothing in Unspoiled fuzzy-matches a
+business by name to an enforcement row.
+
+## Threshold status
+
+| Status | Condition |
+|--------|-----------|
+| Above threshold | `tonsPerYear ≥ banThreshold` AND `nearestProcessorMiles ≤ distance_threshold` (both thresholds from `bans_thresholds.csv`) |
+| Near threshold | `tonsPerYear ≥ 0.5 × banThreshold` AND not above |
+| Below threshold | Otherwise |
+
+---
+
+## API routes
 
 | Route | Description |
 |-------|-------------|
-| `GET /api/portfolio` | List of `BuildingSummary[]`, filterable by `city` and `level` |
-| `GET /api/portfolio/[id]` | `BuildingDetail` for a single building |
-| `GET /api/events` | Array of `SeismicEvent[]` for the past 30 days |
+| `GET /api/generators` | Paginated / filtered list: `state`, `category`, `status`, `covered`, `q`, `sort`, `order`, `limit`, `offset` |
+| `GET /api/generators/[id]` | Single generator + top-5 nearest processors + applicable ban |
+| `GET /api/processors` | All permitted food-scrap processors |
+| `GET /api/summary` | Portfolio-level aggregates (by state, category, threshold status) |
+| `GET /api/model` | Model metrics + 600-point predicted-vs-actual scatter |
+| `GET /api/bans` | Latest ban threshold per state + full ban history + state effect sizes |
+| `GET /api/evidence` | Dryad evidence bundle (state effects, Boulder, Seattle, enforcement count, category counts) |
+| `GET /api/enforcement` | Summary (totals + per-year + per-type + per-program + top-towns leaderboard). Append `?full=1` for the 933 redaction-safe records. |
+| `GET /api/generators/points` | Minimal per-generator payload (id, lat, lon, state, category, tons, nearest-processor id, threshold status, town enforcement count) for the map layer. |
 
 ---
 
-## Tech Stack
+## Getting started
 
-- **Next.js 16** (App Router, TypeScript, Turbopack)
-- **Tailwind CSS v4** + **shadcn/ui**
-- **WebGL** for animated hero shader background (gray plasma wave, `shader-background.tsx`)
-- Pure **SVG** charts for resonance profiles and floor stress (no Recharts dependency)
+Train the model (writes JSON + PyTorch weights):
 
----
+```bash
+python3 -m pip install -r scripts/requirements.txt
+python3 scripts/train.py
+```
 
-## Getting Started
+Run the web app:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — marketing site.
-Dashboard at [http://localhost:3000/dashboard](http://localhost:3000/dashboard).
+- Landing: [http://localhost:3000](http://localhost:3000)
+- Dashboard: [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
 
-No external API keys required. All risk data is generated deterministically from a seeded building database.
+No API keys. No external calls at runtime.
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
+data/raw/                            # curated CSVs from the Dryad OWB dataset
+models/                              # PyTorch checkpoints (unspoiled.pt)
+scripts/
+├── train.py                         # data prep + training + JSON export
+└── requirements.txt
 src/
 ├── app/
-│   ├── page.tsx                        # Marketing site (Seismic landing page)
-│   ├── dashboard/page.tsx              # Dashboard shell (Portfolio + Events tabs)
+│   ├── page.tsx                     # landing site
+│   ├── dashboard/page.tsx           # operator console (server component)
 │   └── api/
-│       ├── portfolio/route.ts          # Building list API
-│       ├── portfolio/[id]/route.ts     # Building detail API
-│       └── events/route.ts            # Seismic events API
+│       ├── generators/route.ts
+│       ├── generators/[id]/route.ts
+│       ├── processors/route.ts
+│       ├── summary/route.ts
+│       ├── model/route.ts
+│       ├── bans/route.ts
+│       └── evidence/route.ts
 ├── components/
-│   ├── marketing/SiteNav.tsx           # Top nav
+│   ├── marketing/SiteNav.tsx
 │   ├── dashboard/
-│   │   ├── DashboardShell.tsx          # Portfolio tab shell
-│   │   ├── SummaryCards.tsx            # Portfolio/critical/payout/GWP metric cards
-│   │   ├── FilterBar.tsx               # City + risk level filters
-│   │   ├── UnitsTable.tsx              # Buildings table
-│   │   └── StatusBadge.tsx             # Risk level badge
-│   ├── detail/
-│   │   ├── DetailPanel.tsx             # Side-panel drawer for building detail
-│   │   ├── UnitMetaCard.tsx            # Building metadata + score/premium/cap
-│   │   ├── HourlyTrendChart.tsx        # Resonance profile SVG chart
-│   │   └── AnomalyScoreChart.tsx       # Per-floor stress bar chart
-│   ├── fcu/FcuShell.tsx               # Seismic events tab (30-day feed)
-│   └── ui/
-│       └── shader-background.tsx       # WebGL animated gray plasma shader (hero)
+│   │   ├── DashboardShell.tsx
+│   │   ├── SummaryCards.tsx
+│   │   ├── GeneratorsTable.tsx
+│   │   ├── ProcessorsTable.tsx
+│   │   ├── GeneratorDetailPanel.tsx
+│   │   ├── ModelPerformance.tsx
+│   │   └── ComplianceBadge.tsx
+│   ├── charts/
+│   │   ├── ScatterChart.tsx
+│   │   └── BarChart.tsx
+│   └── ui/                         # shadcn primitives
 └── lib/
-    ├── types.ts                        # Building, RiskScore, Pricing, SeismicEvent types
-    ├── seismic-data.ts                 # Seed buildings + deterministic risk/event generator
-    └── utils.ts                        # cn(), formatting helpers
+    ├── types.ts
+    ├── harvest-data.ts             # server-side data module
+    ├── utils.ts
+    └── data/                       # JSON written by scripts/train.py
+        ├── generators.json
+        ├── processors.json
+        ├── bans.json
+        ├── model_metrics.json
+        └── evidence.json
 ```
-
----
-
-## Planned Data Integration
-
-### [Zenodo: SeisSol Southern California Ground Motion Database](https://zenodo.org/records/12520845)
-
-Physics-based synthetic seismograms computed with SeisSol (3D velocity model, viscoelastic attenuation, topography).
-
-| File | Size | Contents |
-|------|------|----------|
-| `velocity_time_series.npy` | 176.7 GB | Full dataset — shape `(500, 8181, 3, 6000)` |
-| `seismos_16_receivers.npy` | 38.4 MB | 16-receiver demo — suitable for dev/testing |
-| `source_locations.csv` | 18 kB | Lat/lon for all 500 earthquake sources |
-| `seissol_input_files.zip` | 94 MB | Mesh, material properties, SeisSol config |
-| `seismogram_rom_demo.ipynb` | 101 kB | Tutorial notebook |
-
-**Schema:** 500 sources × 8181 receivers × 3 components (E-W, N-S, vertical) × 6000 timesteps (60s at 100 Hz)
-
-**Integration plan:**
-1. **Receiver → building mapping** — geocode receiver lat/lons, spatial-join to portfolio addresses
-2. **Scenario lookup** — for a new USGS event, find the nearest source in the 500-scenario database
-3. **PGV extraction** — `max(abs(v_timeseries))` per component → trigger threshold check
-4. **Resonance profiling** — FFT the 3-component series at building's dominant Hz (derived from floor count); produces the spectral input for the `alpa_(ti)` decay model
-5. **Per-floor stress** — convolve site ground motion with building transfer function (MDOF model, floor-by-floor mass/stiffness from USGS geometry)
-
-**Architecture:** Python/FastAPI sidecar service reads `.npy` chunks; Next.js `/api/portfolio` and `/api/events` proxy to it. The 38 MB demo file covers development with 16 receivers.
-
-### Other sources
-- [USGS ShakeMap](https://earthquake.usgs.gov/data/shakemap/) — real-time PGV/PGA maps for live trigger evaluation
-- [USGS 3D Building Geometries](https://www.usgs.gov/) — floor-by-floor mass and stiffness inputs
-- [Scripps Institution of Oceanography](https://ds.iris.edu/) — additional synthetic seismogram validation
